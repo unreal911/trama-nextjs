@@ -1,6 +1,6 @@
 .trama-admin {
   min-height: 100vh;
-  background: #f8f4ef;
+  background: var(--intro-surface);
 }
 
 .trama-admin-header {
@@ -9,12 +9,13 @@
   align-items: center;
   gap: 16px;
   padding: 20px max(24px, calc((100vw - 1120px) / 2));
-  border-bottom: 1px solid var(--line);
-  background: var(--surface);
+  border-bottom: 1px solid var(--on-brand-line);
+  background: var(--brand);
+  color: var(--on-brand);
 }
 
 .trama-admin-link {
-  color: var(--brand);
+  color: var(--warm);
   font-size: .9rem;
   font-weight: 700;
 }
@@ -225,7 +226,7 @@
 
 .trama-admin-variant-status.has-error,
 .trama-admin-zip-issues {
-  color: var(--brand);
+  color: var(--error);
 }
 
 .trama-admin-zip-issues {
@@ -280,7 +281,7 @@
   width: 18px;
   height: 18px;
   margin: 0;
-  accent-color: var(--button);
+  accent-color: var(--accent);
 }
 
 .trama-admin-help,
@@ -299,7 +300,7 @@
 }
 
 .trama-admin-status.has-error {
-  color: var(--brand);
+  color: var(--error);
   font-weight: 700;
 }
 
@@ -320,7 +321,7 @@
   padding: 8px 14px;
   border: 1px solid transparent;
   border-radius: 8px;
-  background: var(--brand);
+  background: var(--button);
   color: var(--on-button);
   font-size: .875rem;
   font-weight: 700;
@@ -386,8 +387,8 @@
 .trama-admin-badge {
   border-radius: 999px;
   padding: 3px 8px;
-  background: #f3efea;
-  color: #63554a;
+  background: var(--soft);
+  color: var(--muted);
   font-size: .72rem;
   font-weight: 700;
 }

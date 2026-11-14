@@ -1,4 +1,4 @@
-/* Trama Mayorista — a quiet, editorial storefront. */
+/* Shared storefront palette and layouts. */
 
 :root {
   font-family: 'DM Sans',sans-serif;
@@ -7,49 +7,48 @@
   font-synthesis: none;
   scroll-behavior: smooth;
   scroll-padding-top: 95px;
-  --paper: #ffffff;
+  --paper: #fbfcfe;
   --surface: #ffffff;
-  --ink: #29211c;
-  --muted: #70655c;
-  --line: #e7dfd8;
-  --accent: #b7460c;
-  --soft: #fff0e5;
-  --intro-surface: #ffffff;
-  --brand: #9e3c0a;
-  --on-brand: #fff8f2;
-  --on-brand-muted: #ffe0c4;
-  --on-brand-soft: #ffecd9;
-  --on-brand-line: #ffe0c440;
-  --button: #c84b08;
-  --on-button: #ffffff;
-  --button-hover: #a63b05;
-  --warm: #ffd3ab;
-  --control-line: #bfaa99;
+  --ink: #071e43;
+  --muted: #4b5b70;
+  --line: #d8e1ec;
+  --accent: #234e80;
+  --soft: #edf3fa;
+  --intro-surface: #f2f6fb;
+  --brand: #071e43;
+  --brand-blue: #163650;
+  --on-brand: #ffffff;
+  --on-brand-muted: #c4d4e8;
+  --on-brand-soft: #e5eef9;
+  --on-brand-line: #ffffff38;
+  --button: #ffcb1f;
+  --on-button: #071e43;
+  --button-hover: #ffe065;
+  --warm: #ffcb1f;
+  --control-line: #778ba4;
   --tag-surface: #ffffffed;
-  --overlay: #1c120cd6;
-  --shadow: #39200f30;
-  --shadow-soft: #39200f14;
-  --shadow-dialog: #1c100870;
-  --decoration: #ffe0c41c;
+  --overlay: #06152cbd;
+  --shadow: #071e4330;
+  --shadow-soft: #071e4314;
+  --shadow-dialog: #07162c70;
+  --decoration: #ffcb1f26;
+  --error: #a52b21;
 }
 
 :root[data-trama-theme="dark"] {
-  --paper: #181513;
-  --surface: #211c18;
-  --ink: #fff4ea;
-  --muted: #c9b7aa;
-  --line: #493b30;
-  --accent: #ffad72;
-  --soft: #30241b;
-  --intro-surface: #211b16;
-  --brand: #86380f;
-  --button: #ffac6c;
-  --on-button: #291407;
-  --button-hover: #ffc696;
-  --control-line: #8d7461;
-  --tag-surface: #211c18eb;
+  --paper: #091729;
+  --surface: #101f34;
+  --ink: #f4f8ff;
+  --muted: #afc0d5;
+  --line: #31465f;
+  --accent: #ffcb1f;
+  --soft: #172b43;
+  --intro-surface: #13243b;
+  --control-line: #849ab4;
+  --tag-surface: #101f34ed;
   --shadow: #00000050;
   --shadow-soft: #00000028;
+  --error: #ffb4ab;
 }
 
 * {
@@ -139,39 +138,19 @@ button,a,input,select,summary {
   top: 10px;
 }
 
-.demo-bar {
-  min-height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 4.5%;
-  background: var(--brand);
-  color: var(--on-brand);
-  font-size: 10px;
-  letter-spacing: .02em;
-}
-
-.demo-bar>span {
-  font-size: 8px;
-  letter-spacing: .13em;
-  opacity: .72;
-}
-
-.demo-bar a:hover {
-  text-decoration: underline;
-}
-
 .announcement {
-  padding: 12px 18px;
+  padding: 8px 18px;
   text-align: center;
-  background: var(--soft);
+  background: var(--button);
+  color: var(--on-button);
   font-size: 11px;
   letter-spacing: .015em;
 }
 
 .announcement span {
   padding: 0 10px;
-  color: var(--muted);
+  color: inherit;
+  opacity: .75;
 }
 
 .trama-header {
@@ -181,35 +160,44 @@ button,a,input,select,summary {
   align-items: center;
   justify-content: space-between;
   gap: 32px;
-  min-height: 101px;
-  padding: 19px 4.5%;
-  border-bottom: 1px solid var(--line);
-  background: var(--surface);
+  min-height: 82px;
+  padding: 12px 4.5%;
+  border-bottom: 1px solid var(--on-brand-line);
+  background: var(--brand);
+  color: var(--on-brand);
 }
 
 .trama-brand {
-  position: relative;
-  display: block;
-  font: 800 40px/.84 'Manrope',sans-serif;
-  letter-spacing: -3px;
-  min-width: 128px;
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 10px;
+  color: var(--on-brand);
 }
 
-.brand-mark {
-  font-size: 26px;
-  display: inline-block;
-  vertical-align: top;
-  margin: 0 0 0 6px;
-  line-height: 1;
-  letter-spacing: 0;
+.brand-logo {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: contain;
 }
 
-.trama-brand small {
+.brand-wordmark {
+  font: 800 24px/1 'Manrope', sans-serif;
+  letter-spacing: -.045em;
+}
+
+.brand-wordmark small {
   display: block;
-  font: 600 8px/1 'DM Sans',sans-serif;
-  letter-spacing: 4.4px;
-  margin-top: 10px;
-  padding-left: 2px;
+  margin-top: 4px;
+  color: var(--warm);
+  font: 800 10px/1 'DM Sans', sans-serif;
+  letter-spacing: .095em;
+}
+
+:is(.trama-header, .trama-footer, .trama-admin-header, .trama-hero, .trama-home-wholesale, .wholesale) :focus-visible {
+  outline-color: var(--warm);
 }
 
 .trama-nav {
@@ -225,7 +213,7 @@ button,a,input,select,summary {
 }
 
 .trama-nav a:hover {
-  border-color: var(--ink);
+  border-color: var(--warm);
 }
 
 .header-actions {
@@ -266,7 +254,7 @@ button,a,input,select,summary {
 .menu-toggle span {
   display: block;
   height: 1px;
-  background: var(--ink);
+  background: currentColor;
   margin: 7px 0;
 }
 
@@ -274,15 +262,18 @@ button,a,input,select,summary {
   display: grid;
   grid-template-columns: 1fr 1fr;
   position: relative;
-  min-height: 640px;
+  min-height: 530px;
   max-width: 1800px;
   margin: auto;
+  background: linear-gradient(120deg, var(--brand) 12%, var(--brand-blue));
+  color: var(--on-brand);
 }
 
 .hero-copy {
-  padding: 65px 11% 40px 9%;
+  padding: 62px 9%;
   display: flex;
   align-items: flex-start;
+  justify-content: center;
   flex-direction: column;
 }
 
@@ -294,34 +285,27 @@ button,a,input,select,summary {
 }
 
 .hero-copy .eyebrow {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 33px;
-}
-
-.tiny-star {
-  font-size: 20px;
-  line-height: 1;
+  margin-bottom: 22px;
+  color: var(--on-brand-muted);
 }
 
 .hero-copy h1 {
-  font: 500 clamp(46px,5.25vw,84px)/1.045 'Manrope',sans-serif;
-  letter-spacing: -.067em;
+  font: 800 clamp(42px,5.3vw,78px)/1.045 'Manrope',sans-serif;
+  letter-spacing: -.055em;
+  text-wrap: balance;
 }
 
 .hero-copy h1 em {
-  color: var(--accent);
-  font-weight: 500;
+  color: var(--warm);
   font-style: normal;
 }
 
 .hero-description {
-  max-width: 345px;
-  font-size: 14px;
-  line-height: 1.8;
-  color: var(--muted);
-  margin: 27px 0;
+  max-width: 390px;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--on-brand-soft);
+  margin: 20px 0 26px;
 }
 
 .trama-button {
@@ -334,8 +318,9 @@ button,a,input,select,summary {
   color: var(--on-button);
   padding: 15px 21px;
   font-size: 12px;
-  font-weight: 550;
+  font-weight: 750;
   border: 1px solid var(--button);
+  border-radius: 7px;
   transition: background .2s,transform .2s;
 }
 
@@ -350,134 +335,18 @@ button,a,input,select,summary {
   line-height: 1;
 }
 
-.hero-footnote {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-top: 36px;
-  font-size: 10px;
-  line-height: 1.65;
-  color: var(--muted);
-}
-
-.hero-footnote strong {
-  font-weight: 500;
-  color: var(--ink);
-}
-
-.hero-line {
-  display: block;
-  width: 33px;
-  height: 1px;
-  background: var(--ink);
-}
-
 .hero-image {
   position: relative;
-  min-height: 640px;
   overflow: hidden;
-  background: var(--soft);
+  background: var(--brand-blue);
+  border-inline-start: 5px solid var(--warm);
 }
 
 .hero-image>img {
   height: 100%;
   position: absolute;
   inset: 0;
-  object-position: center 43%;
-}
-
-.hero-image:after {
-  content: '';
-  position: absolute;
-  inset: 45% 0 0;
-  background: linear-gradient(transparent,rgba(34,20,12,.38));
-  pointer-events: none;
-}
-
-.collection-label {
-  position: absolute;
-  z-index: 1;
-  left: 35px;
-  right: 35px;
-  bottom: 63px;
-  color: white;
-}
-
-.collection-label>span {
-  font-size: 8px;
-  letter-spacing: .13em;
-}
-
-.collection-label strong {
-  display: block;
-  margin-top: 12px;
-  font: 500 clamp(35px,3.1vw,52px)/1.06 'Manrope',sans-serif;
-  letter-spacing: -.04em;
-}
-
-.collection-label a {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  border: 1px solid #ffffff80;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 23px;
-}
-
-.collection-label a:hover {
-  background: var(--on-brand);
-  color: var(--brand);
-}
-
-.hero-image-caption {
-  position: absolute;
-  z-index: 1;
-  bottom: 26px;
-  left: 35px;
-  color: white;
-  font-size: 8px;
-  letter-spacing: .12em;
-}
-
-.hero-stamp {
-  position: absolute;
-  z-index: 2;
-  top: 55px;
-  left: calc(50% - 50px);
-  width: 102px;
-  height: 102px;
-  border-radius: 50%;
-  background: var(--warm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  transform: rotate(10deg);
-  color: var(--brand);
-}
-
-.hero-stamp>span {
-  font-size: 8px;
-  line-height: 1.5;
-  text-align: center;
-  letter-spacing: .06em;
-}
-
-.hero-stamp b {
-  font-size: 13px;
-  letter-spacing: -.03em;
-  font-weight: 650;
-  margin: 3px 0;
-}
-
-.hero-stamp i {
-  font-size: 19px;
-  font-style: normal;
-  line-height: 1;
+  object-position: center;
 }
 
 .value-strip {
@@ -487,6 +356,7 @@ button,a,input,select,summary {
   border-bottom: 1px solid var(--line);
   border-top: 1px solid var(--line);
   gap: 20px;
+  background: var(--soft);
 }
 
 .value-strip>span {
@@ -505,6 +375,7 @@ button,a,input,select,summary {
   font-size: 20px;
   font-style: normal;
   font-weight: 400;
+  color: var(--accent);
 }
 
 .section-wrap {
@@ -563,6 +434,7 @@ h2 em {
   background: transparent;
   font-size: 11px;
   border: 1px solid transparent;
+  border-radius: 6px;
   white-space: nowrap;
 }
 
@@ -646,6 +518,7 @@ h2 em {
   position: relative;
   aspect-ratio: 4/4.7;
   overflow: hidden;
+  border-radius: 10px;
   background: var(--soft);
 }
 
@@ -785,6 +658,7 @@ h2 em {
   padding: 11px 14px;
   min-height: 43px;
   border: 1px solid var(--control-line);
+  border-radius: 6px;
   background: none;
   font-size: 10px;
   font-weight: 550;
@@ -1102,6 +976,8 @@ h2 em {
 
 .trama-footer {
   padding: 45px 6% 20px;
+  background: var(--brand);
+  color: var(--on-brand);
 }
 
 .footer-top {
@@ -1112,14 +988,10 @@ h2 em {
   padding-bottom: 40px;
 }
 
-.footer-top>.trama-brand {
-  font-size: 35px;
-}
-
 .footer-top>p {
   font-size: 12px;
   line-height: 1.8;
-  color: var(--muted);
+  color: var(--on-brand-muted);
 }
 
 .footer-top>nav {
@@ -1142,15 +1014,15 @@ h2 em {
   justify-content: space-between;
   gap: 20px;
   align-items: center;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid var(--on-brand-line);
   padding-top: 22px;
   font-size: 9px;
-  color: var(--muted);
+  color: var(--on-brand-muted);
 }
 
 .footer-bottom p a {
-  color: var(--ink);
-  border-bottom: 1px solid var(--line);
+  color: var(--on-brand);
+  border-bottom: 1px solid var(--on-brand-line);
 }
 
 /* Native dialog keeps the order accessible to keyboard and touch users. */
@@ -1201,12 +1073,6 @@ body:has(#order-dialog[open]) {
   background: transparent;
   font-size: 30px;
   font-weight: 400;
-}
-
-.order-demo-note {
-  font-size: 10px;
-  color: var(--muted);
-  margin: 15px 0;
 }
 
 .order-item {
@@ -1424,23 +1290,11 @@ body:has(#order-dialog[open]) {
 @media(min-width:1600px) {
 
   .trama-hero {
-    min-height: 760px;
-  }
-
-  .hero-image {
-    min-height: 760px;
-  }
-
-  .hero-copy {
-    padding-top: 90px;
+    min-height: 620px;
   }
 
   .hero-description {
     font-size: 16px;
-  }
-
-  .hero-footnote {
-    margin-top: 45px;
   }
 
   .trama-header {
@@ -1456,32 +1310,6 @@ body:has(#order-dialog[open]) {
 
   .trama-nav {
     gap: 20px;
-  }
-
-  .hero-copy {
-    padding-top: 55px;
-  }
-
-  .trama-hero,.hero-image {
-    min-height: 600px;
-  }
-
-  .hero-copy h1 {
-    font-size: clamp(49px,5.7vw,65px);
-  }
-
-  .hero-description {
-    font-size: 12px;
-  }
-
-  .hero-copy .eyebrow {
-    font-size: 8px;
-  }
-
-  .hero-stamp {
-    width: 90px;
-    height: 90px;
-    left: calc(50% - 45px);
   }
 
   .section-wrap {
@@ -1543,23 +1371,22 @@ body:has(#order-dialog[open]) {
 @media(max-width:800px) {
 
   .trama-header {
-    min-height: 88px;
+    min-height: 74px;
     padding-inline: 5%;
     gap: 15px;
   }
 
-  .trama-brand {
-    font-size: 34px;
-    min-width: 115px;
+  .brand-logo {
+    width: 48px;
+    height: 48px;
   }
 
-  .brand-mark {
-    font-size: 23px;
+  .brand-wordmark {
+    font-size: 22px;
   }
 
-  .trama-brand small {
-    font-size: 7px;
-    letter-spacing: 4px;
+  .brand-wordmark small {
+    font-size: 9px;
   }
 
   .menu-toggle {
@@ -1572,9 +1399,9 @@ body:has(#order-dialog[open]) {
     left: 0;
     right: 0;
     top: 100%;
-    background: var(--paper);
+    background: var(--brand);
     padding: 20px 5% 26px;
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid var(--on-brand-line);
     box-shadow: 0 15px 20px var(--shadow-soft);
     flex-direction: column;
     gap: 10px;
@@ -1588,89 +1415,11 @@ body:has(#order-dialog[open]) {
     font-size: 11px;
   }
 
-  .demo-bar>span {
-    display: none;
-  }
-
-  .trama-hero,.hero-image {
-    min-height: 535px;
-  }
-
-  .hero-copy {
-    padding: 40px 12% 30px 10%;
-  }
-
-  .hero-copy .eyebrow {
-    line-height: 1.8;
-    font-size: 7px;
-    gap: 7px;
-    margin-bottom: 25px;
-  }
-
-  .hero-copy h1 {
-    font-size: clamp(39px,5.8vw,52px);
-  }
-
-  .hero-description {
-    font-size: 12px;
-    margin: 22px 0;
-  }
-
   .trama-button {
     font-size: 10px;
     padding: 14px 16px;
     gap: 25px;
     min-height: 47px;
-  }
-
-  .hero-footnote {
-    margin-top: 27px;
-    font-size: 9px;
-  }
-
-  .hero-stamp {
-    width: 75px;
-    height: 75px;
-    left: calc(50% - 37px);
-    top: 35px;
-  }
-
-  .hero-stamp>span {
-    font-size: 6px;
-  }
-
-  .hero-stamp b {
-    font-size: 10px;
-  }
-
-  .hero-stamp i {
-    font-size: 14px;
-  }
-
-  .collection-label {
-    left: 23px;
-    right: 23px;
-    bottom: 55px;
-  }
-
-  .collection-label>span {
-    font-size: 6px;
-  }
-
-  .collection-label strong {
-    font-size: 31px;
-  }
-
-  .collection-label a {
-    width: 38px;
-    height: 38px;
-    font-size: 20px;
-  }
-
-  .hero-image-caption {
-    left: 23px;
-    font-size: 6px;
-    bottom: 23px;
   }
 
   .value-strip {
@@ -1819,12 +1568,6 @@ body:has(#order-dialog[open]) {
 
 @media(max-width:560px) {
 
-  .demo-bar {
-    padding: 8px 5%;
-    font-size: 9px;
-    min-height: 32px;
-  }
-
   .announcement {
     font-size: 9px;
     line-height: 1.6;
@@ -1836,14 +1579,17 @@ body:has(#order-dialog[open]) {
   }
 
   .trama-header {
-    min-height: 83px;
-    padding-top: 18px;
-    padding-bottom: 18px;
+    min-height: 68px;
+    padding-block: 9px;
   }
 
-  .trama-brand {
-    font-size: 33px;
-    min-width: 115px;
+  .brand-logo {
+    width: 42px;
+    height: 42px;
+  }
+
+  .brand-wordmark {
+    font-size: 20px;
   }
 
   .header-actions {
@@ -1865,90 +1611,10 @@ body:has(#order-dialog[open]) {
     font-size: 9px;
   }
 
-  .trama-hero {
-    grid-template-columns: 1fr;
-  }
-
-  .hero-copy {
-    padding: 43px 7% 37px;
-  }
-
-  .hero-copy .eyebrow {
-    font-size: 8px;
-    margin-bottom: 23px;
-    gap: 10px;
-  }
-
-  .hero-copy h1 {
-    font-size: clamp(50px,12.2vw,68px);
-    letter-spacing: -.065em;
-  }
-
-  .hero-description {
-    font-size: 13px;
-    max-width: 320px;
-    line-height: 1.8;
-    margin: 22px 0;
-  }
-
   .hero-copy>.trama-button {
     font-size: 11px;
     min-height: 49px;
     padding-inline: 19px;
-  }
-
-  .hero-footnote {
-    display: none;
-  }
-
-  .hero-image {
-    min-height: 0;
-    height: 480px;
-  }
-
-  .hero-image>img {
-    object-position: 50% 38%;
-  }
-
-  .hero-stamp {
-    top: 380px;
-    left: auto;
-    right: 26px;
-    width: 85px;
-    height: 85px;
-  }
-
-  .hero-stamp>span {
-    font-size: 7px;
-  }
-
-  .hero-stamp b {
-    font-size: 11px;
-  }
-
-  .hero-image-caption {
-    left: 25px;
-    bottom: 23px;
-    font-size: 7px;
-  }
-
-  .collection-label {
-    left: 25px;
-    right: 25px;
-    bottom: 56px;
-  }
-
-  .collection-label strong {
-    font-size: 39px;
-  }
-
-  .collection-label>span {
-    font-size: 7px;
-  }
-
-  .collection-label a {
-    width: 42px;
-    height: 42px;
   }
 
   .value-strip {
@@ -2306,10 +1972,6 @@ body:has(#order-dialog[open]) {
     padding-bottom: 30px;
   }
 
-  .footer-top>.trama-brand {
-    font-size: 33px;
-  }
-
   .footer-top>p {
     font-size: 11px;
     justify-self: end;
@@ -2347,10 +2009,6 @@ body:has(#order-dialog[open]) {
 
   .order-heading h2 {
     font-size: 31px;
-  }
-
-  .order-heading .eyebrow {
-    font-size: 8px;
   }
 
   .order-item {

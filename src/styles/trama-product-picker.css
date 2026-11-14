@@ -15,6 +15,7 @@
   color: var(--ink);
   background: var(--paper);
   border: 1px solid var(--line);
+  border-radius: 12px;
   box-shadow: 0 24px 90px var(--shadow-dialog);
   overscroll-behavior: contain;
 }
@@ -37,7 +38,7 @@ body:has(#product-dialog[open]) { overflow: hidden; }
 .picker-options h3 > span { margin-right: 8px; color: var(--accent); font-size: 10px; }
 .picker-active-color { margin-inline-start: 8px; color: var(--accent); overflow-wrap: anywhere; }
 .picker-colors { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-.picker-color { position: relative; display: grid; place-items: center; flex: 0 0 44px; height: 44px; padding: 0; background: var(--paper); border: 1px solid var(--control-line); }
+.picker-color { position: relative; display: grid; place-items: center; flex: 0 0 44px; height: 44px; padding: 0; background: var(--paper); border: 1px solid var(--control-line); border-radius: 6px; }
 .picker-color[aria-pressed='true'] { border-color: var(--accent); background: var(--soft); box-shadow: inset 0 0 0 1px var(--accent); }
 .picker-swatch { width: 22px; height: 22px; border-radius: 50%; background: var(--swatch, var(--line)); border: 1px solid var(--control-line); }
 .picker-color-count { position: absolute; inset: auto 1px 1px auto; min-width: 15px; padding-inline: 2px; border-radius: 7px; color: var(--paper); background: var(--ink); font-size: 9px; line-height: 14px; }
@@ -75,7 +76,6 @@ body:has(#product-dialog[open]) { overflow: hidden; }
 #product-picker-add:disabled { opacity: .4; cursor: default; }
 #product-picker-feedback { margin-top: 8px; color: var(--accent); font-size: 12px; line-height: 1.6; }
 #product-picker-feedback:empty { display: none; }
-.picker-demo-note { margin-top: 9px; color: var(--muted); font-size: 9px; line-height: 1.7; }
 #order-copy:disabled { opacity: .45; cursor: default; }
 
 @media (max-width: 760px) {

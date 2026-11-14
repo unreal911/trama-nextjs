@@ -81,7 +81,7 @@ export function mountTramaAdmin(root: HTMLElement) {
 
   const client = createTramaClient();
   if (!client) {
-    setStatus(authStatus, 'Conecta el proyecto Supabase de Trama para iniciar sesión.', true);
+    setStatus(authStatus, 'Configura la conexión con Supabase para iniciar sesión.', true);
     return;
   }
 
@@ -243,7 +243,7 @@ export function mountTramaAdmin(root: HTMLElement) {
 
     if (!isAdmin) {
       editorFields.disabled = true;
-      setStatus(authStatus, session ? 'Esta cuenta no tiene acceso al catálogo de Trama.' : '', Boolean(session));
+      setStatus(authStatus, session ? 'Esta cuenta no tiene acceso al catálogo de Somos Mayoristas.' : '', Boolean(session));
       return;
     }
 

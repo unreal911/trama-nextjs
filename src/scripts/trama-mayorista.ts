@@ -3,6 +3,7 @@ import { MIN_ORDER_QUANTITY, MAX_LINE_QUANTITY, validateOrder, addOrderSelection
 import { tramaSupabaseConfigured } from '../lib/trama-supabase';
 import { loadTramaCatalog } from '../lib/trama-catalog';
 import { tramaColorHex } from '../lib/trama-colors';
+import { BRAND_THEME_COLOR, storeWhatsAppNumber } from '../data/brand';
 
 const STORAGE_KEY = 'trama-mayorista-order-v1';
 const THEME_STORAGE_KEY = 'trama-theme-v1';
@@ -56,7 +57,7 @@ export function initializeTrama(signal: AbortSignal) {
     const isDark = theme === 'dark';
     themeRoot.dataset.tramaTheme = theme;
     themeRoot.style.colorScheme = theme;
-    document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#181513' : '#ffffff');
+    document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute('content', BRAND_THEME_COLOR);
     themeButtons.forEach((button) => {
       const action = isDark ? 'Activar modo claro' : 'Activar modo oscuro';
       button.setAttribute('aria-label', action);
@@ -191,7 +192,7 @@ export function initializeTrama(signal: AbortSignal) {
       const ready = quantity >= MIN_ORDER_QUANTITY;
       whatsappLink.setAttribute('aria-disabled', String(!ready));
       whatsappLink.tabIndex = ready ? 0 : -1;
-      if (ready) whatsappLink.href = buildOrderWhatsAppUrl(order, undefined, productById);
+      if (ready) whatsappLink.href = buildOrderWhatsAppUrl(order, storeWhatsAppNumber, productById);
       else whatsappLink.removeAttribute('href');
     }
     const values = { '#order-subtotal': formatPrice(subtotal), '#order-discount': `− ${formatPrice(discount)}`, '#order-total': formatPrice(total) };

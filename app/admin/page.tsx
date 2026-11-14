@@ -1,12 +1,14 @@
 import type { Metadata } from 'next';
 import { AdminClient } from './admin-client';
+import StoreBrand from '../../src/components/StoreBrand';
+import { STORE_NAME } from '../../src/data/brand';
 import '../../src/styles/fonts.css';
 import '../../src/styles/demo-trama.css';
 import '../../src/styles/trama-admin.css';
 
 export const metadata: Metadata = {
-  title: 'Administrar catálogo — Trama Mayorista',
-  description: 'Panel de administración del catálogo de Trama Mayorista.',
+  title: 'Administrar catálogo',
+  description: `Panel de administración del catálogo de ${STORE_NAME}.`,
   robots: { index: false, follow: false },
 };
 
@@ -58,9 +60,7 @@ export default function AdminPage() {
   return (
     <AdminClient>
       <header className="trama-admin-header">
-        <a className="trama-brand" href="/" aria-label="Trama Mayorista, inicio">
-          trama<span className="brand-mark" aria-hidden="true">✳</span><small>MAYORISTA</small>
-        </a>
+        <StoreBrand />
         <a className="trama-admin-link" href="/coleccion">Ver colección <span aria-hidden="true">↗</span></a>
       </header>
       <main className="trama-admin-main">

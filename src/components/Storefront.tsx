@@ -3,16 +3,14 @@ import '../styles/fonts.css';
 import '../styles/demo-trama.css';
 import '../styles/trama-pages.css';
 import '../styles/trama-product-picker.css';
-import { tramaStoreContact } from '../data/trama';
+import { STORE_NAME, storeWhatsAppNumber } from '../data/brand';
+import StoreBrand from './StoreBrand';
 import StorefrontRuntime from './StorefrontRuntime';
 import TramaProductPicker from './TramaProductPicker';
 
 type Page = 'inicio' | 'coleccion' | 'mayoristas' | 'como-comprar';
 
 const home = '/';
-const caseStudyUrl = 'https://nubicore.digital/proyectos/trama-mayorista/';
-const designerContact = new URL(`https://wa.me/${tramaStoreContact.whatsappNumber}`);
-designerContact.searchParams.set('text', `Hola, ${tramaStoreContact.recipient}. Vi la demo Trama Mayorista y quiero una web para mi negocio de ropa.`);
 const themeScript = `(() => {
   let theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   try {
@@ -24,7 +22,7 @@ const themeScript = `(() => {
 })();`;
 const navigation: { key: Page; label: string; href: string }[] = [
   { key: 'inicio', label: 'Inicio', href: home },
-  { key: 'coleccion', label: 'La colección', href: '/coleccion' },
+  { key: 'coleccion', label: 'Catálogo', href: '/coleccion' },
   { key: 'mayoristas', label: 'Mayoristas', href: '/mayoristas' },
   { key: 'como-comprar', label: 'Cómo comprar', href: '/como-comprar' },
 ];
@@ -40,11 +38,10 @@ export default function Storefront({ currentPage, children }: Props) {
       <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       <StorefrontRuntime />
       <a className="skip-link" href="#contenido">Saltar al contenido</a>
-      <div className="demo-bar"><a href={caseStudyUrl}>← Volver al proyecto</a><span>UN CONCEPTO DE {tramaStoreContact.recipient.toUpperCase()}</span><a href={designerContact.toString()} target="_blank" rel="noopener noreferrer">Quiero una web así ↗</a></div>
-      <div className="announcement">Ideas en grande. Pedidos desde <strong>6 prendas.</strong><span> / </span>Combina modelos, tallas y colores.</div>
+      <div className="announcement">Venta al por mayor desde <strong>6 prendas</strong><span> · </span>Combina modelos, tallas y colores.</div>
       <header className="trama-header">
-        <a className="trama-brand" href={home} aria-label="Trama Mayorista, inicio">trama<span className="brand-mark" aria-hidden="true">✳</span><small>MAYORISTA</small></a>
-        <nav id="trama-nav" className="trama-nav" aria-label="Navegación de Trama">
+        <StoreBrand />
+        <nav id="trama-nav" className="trama-nav" aria-label="Navegación principal">
           {navigation.map((item) => <a key={item.key} href={item.href} aria-current={currentPage === item.key ? 'page' : undefined}>{item.label}</a>)}
         </nav>
         <div className="header-actions">
@@ -62,29 +59,28 @@ export default function Storefront({ currentPage, children }: Props) {
 
       <footer className="trama-footer">
         <div className="footer-top">
-          <a className="trama-brand" href={home}>trama<span className="brand-mark" aria-hidden="true">✳</span><small>MAYORISTA</small></a>
-          <p>Ropa al por mayor.<br />Ideas en grande.</p>
+          <StoreBrand />
+          <p>Confección y venta<br />de ropa al por mayor.</p>
           <nav aria-label="Navegación del pie de página">{navigation.map((item) => <a key={item.key} href={item.href} aria-current={currentPage === item.key ? 'page' : undefined}>{item.label}</a>)}</nav>
           <button type="button" className="text-link" data-open-order>Ver mi pedido <span aria-hidden="true">↗</span></button>
         </div>
-        <div className="footer-bottom"><span>© {new Date().getFullYear()} Trama · Marca conceptual</span><p>Diseño y desarrollo por <a href={designerContact.toString()} target="_blank" rel="noopener noreferrer">{tramaStoreContact.recipient} ↗</a></p><a href={caseStudyUrl}>Volver al caso de estudio ↗</a></div>
+        <div className="footer-bottom"><span>© {new Date().getFullYear()} {STORE_NAME}</span></div>
       </footer>
 
       <TramaProductPicker />
       <dialog id="order-dialog" aria-labelledby="order-title">
-        <div className="order-heading"><div><p className="eyebrow">TU PRÓXIMA COLECCIÓN</p><h2 id="order-title">Mi pedido<span>.</span></h2></div><button type="button" id="close-order" aria-label="Cerrar mi pedido">×</button></div>
-        <p className="order-demo-note">Pedido de demostración · No se realizan compras.</p>
+        <div className="order-heading"><h2 id="order-title">Mi pedido</h2><button type="button" id="close-order" aria-label="Cerrar mi pedido">×</button></div>
         <p id="order-catalog-status" role="status" hidden></p>
-        <div id="order-empty"><span aria-hidden="true">✳</span><h3>Tu próxima colección empieza con una prenda.</h3><p>Explora el catálogo y elige cantidades por talla y color. El mínimo es de 6 prendas combinadas en todo el pedido.</p><a className="text-link" href="/coleccion">Ir a la colección <span aria-hidden="true">↗</span></a></div>
+        <div id="order-empty"><h3>Tu pedido está vacío</h3><p>Elige al menos 6 prendas combinando modelos, tallas y colores.</p><a className="text-link" href="/coleccion">Ir a la colección <span aria-hidden="true">↗</span></a></div>
         <div id="order-items"></div>
         <div id="order-summary" hidden>
           <div className="order-tier-note" id="order-tier-note"></div>
-          <dl className="order-totals"><div><dt>Subtotal</dt><dd id="order-subtotal">S/ 0.00</dd></div><div><dt>Descuento por volumen</dt><dd id="order-discount">S/ 0.00</dd></div><div className="order-grand-total"><dt>Total de muestra</dt><dd id="order-total">S/ 0.00</dd></div></dl>
+          <dl className="order-totals"><div><dt>Subtotal</dt><dd id="order-subtotal">S/ 0.00</dd></div><div><dt>Descuento por volumen</dt><dd id="order-discount">S/ 0.00</dd></div><div className="order-grand-total"><dt>Total referencial</dt><dd id="order-total">S/ 0.00</dd></div></dl>
           <div className="order-actions">
-            <a id="order-whatsapp" className="trama-button" role="link" aria-disabled="true" tabIndex={-1} target="_blank" rel="noopener noreferrer" aria-describedby="order-copy-note">Copiar y enviar por WhatsApp <span aria-hidden="true">↗</span></a>
-            <button type="button" id="order-copy" className="trama-button">Solo copiar resumen <span aria-hidden="true">⧉</span></button>
+            {storeWhatsAppNumber && <a id="order-whatsapp" className="trama-button" role="link" aria-disabled="true" tabIndex={-1} target="_blank" rel="noopener noreferrer" aria-describedby="order-copy-note">Copiar y enviar por WhatsApp <span aria-hidden="true">↗</span></a>}
+            <button type="button" id="order-copy" className="trama-button">Copiar resumen <span aria-hidden="true">⧉</span></button>
           </div>
-          <p className="order-copy-note" id="order-copy-note">Se abrirá el WhatsApp de {tramaStoreContact.recipient} ({tramaStoreContact.whatsappLabel}) con tu pedido de demostración. Revisa el mensaje antes de enviarlo. Los precios y productos son ilustrativos.</p>
+          <p className="order-copy-note" id="order-copy-note">Confirma la disponibilidad y coordina la entrega con {STORE_NAME}.</p>
         </div>
         <p id="order-feedback" role="status" aria-live="polite"></p><label className="sr-only" htmlFor="order-export">Resumen del pedido para copiar manualmente</label><textarea id="order-export" readOnly hidden></textarea>
       </dialog>

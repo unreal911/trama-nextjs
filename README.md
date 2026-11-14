@@ -1,10 +1,12 @@
-# Trama Mayorista
+# Somos Mayoristas
 
-Versión independiente en Next.js con catálogo, pedido mayorista y panel de productos. El proyecto conserva el catálogo y la autenticación de Trama en Supabase.
+Tienda en Next.js con catálogo, pedido mayorista y panel de productos. Usa Supabase para el catálogo, las imágenes y la autenticación.
 
 ## Inicio local
 
-Requiere Node.js 22.18 o posterior. Crea un archivo `.env.local` en la raíz del proyecto con `NEXT_PUBLIC_TRAMA_SUPABASE_URL` y `NEXT_PUBLIC_TRAMA_SUPABASE_ANON_KEY`. Usa la URL y la clave pública de Supabase. Si vienes de Astro, reutiliza los valores de `PUBLIC_TRAMA_SUPABASE_URL` y `PUBLIC_TRAMA_SUPABASE_ANON_KEY`.
+Requiere Node.js 22.18 o posterior. Crea un archivo `.env.local` en la raíz del proyecto con `NEXT_PUBLIC_TRAMA_SUPABASE_URL` y `NEXT_PUBLIC_TRAMA_SUPABASE_ANON_KEY`. Usa la URL y la clave pública del proyecto de Supabase existente.
+
+Para habilitar «Copiar y enviar por WhatsApp», configura `NEXT_PUBLIC_STORE_WHATSAPP_NUMBER` con el número oficial de la tienda, incluido el código de país, solo con dígitos. En Netlify, añade las variables en **Project configuration → Environment variables** con alcance **Builds** y ejecuta un nuevo despliegue.
 
 ```powershell
 npm install
@@ -15,7 +17,7 @@ Abre `http://localhost:3000` para la tienda y `http://localhost:3000/admin` para
 
 ## Supabase
 
-En un catálogo Trama existente con tonos y subida de imágenes habilitados, ejecuta [trama_product_color_images.sql](supabase/trama_product_color_images.sql) en SQL Editor. La migración añade un campo para las fotos de color y deja disponibles las fichas existentes.
+Si el catálogo existente todavía no admite fotos por color, ejecuta [trama_product_color_images.sql](supabase/trama_product_color_images.sql) en SQL Editor. La migración añade un campo para las fotos de color y conserva las fichas existentes.
 
 En un proyecto Supabase nuevo, ejecuta estos archivos en orden:
 
@@ -24,7 +26,7 @@ En un proyecto Supabase nuevo, ejecuta estos archivos en orden:
 3. [trama_product_images.sql](supabase/trama_product_images.sql)
 4. [trama_product_color_images.sql](supabase/trama_product_color_images.sql)
 
-Las cuentas administradoras conservan el mismo permiso de Trama. Para crear una, confirma el correo del usuario en **Authentication → Users** y asigna `trama_admin` a su `app_metadata` desde SQL Editor con el UUID correspondiente:
+Las cuentas administradoras usan el permiso `trama_admin`. Para crear una, confirma el correo del usuario en **Authentication → Users** y asigna el permiso en `app_metadata` desde SQL Editor con el UUID correspondiente:
 
 ```sql
 update auth.users

@@ -5,7 +5,7 @@ const catalogColumns = 'id, name, category, label, material, image, price, color
 
 export async function loadTramaCatalog(): Promise<TramaProduct[]> {
   const client = createTramaClient(false);
-  if (!client) throw new Error('Falta configurar Supabase para Trama.');
+  if (!client) throw new Error('Falta configurar la conexión del catálogo con Supabase.');
 
   const catalog: TramaProduct[] = [];
   const pageSize = 500;

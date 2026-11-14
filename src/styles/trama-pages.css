@@ -1,13 +1,12 @@
-/* Shared navigation and the individual Trama pages. */
+/* Navigation and storefront pages. */
 .trama-header {
   position: sticky;
   top: 0;
 }
 
 .trama-nav { gap: 27px; }
-.trama-nav a[aria-current='page'] { border-color: var(--accent); color: var(--accent); font-weight: 700; }
-.trama-brand .brand-mark { color: var(--accent); }
-.footer-top nav a[aria-current='page'] { font-weight: 700; }
+.trama-nav a[aria-current='page'] { border-color: var(--warm); color: var(--warm); font-weight: 700; }
+.footer-top nav a[aria-current='page'] { color: var(--warm); font-weight: 700; }
 
 .trama-theme-toggle {
   display: inline-flex;
@@ -17,13 +16,13 @@
   width: 44px;
   height: 44px;
   padding: 10px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--on-brand-line);
   border-radius: 50%;
-  background: var(--soft);
-  color: var(--ink);
+  background: var(--brand-blue);
+  color: var(--on-brand);
 }
 
-.trama-theme-toggle:hover { border-color: var(--accent); }
+.trama-theme-toggle:hover { border-color: var(--warm); }
 .trama-theme-toggle svg { width: 19px; height: 19px; }
 .trama-theme-sun { display: none; }
 .trama-theme-moon { display: flex; }
@@ -58,8 +57,8 @@
 .trama-page-intro .eyebrow { margin-bottom: 18px; color: var(--accent); }
 .trama-page-intro h1 {
   max-width: 930px;
-  font: 500 clamp(42px, 5.5vw, 79px)/1.08 'Manrope', sans-serif;
-  letter-spacing: -.06em;
+  font: 750 clamp(42px, 5.5vw, 79px)/1.08 'Manrope', sans-serif;
+  letter-spacing: -.055em;
   text-wrap: balance;
 }
 
@@ -105,14 +104,14 @@
 .trama-mobile-only { display: none; }
 .trama-category-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
 .trama-category-card { display: block; }
-.trama-category-image { overflow: hidden; background: var(--soft); aspect-ratio: 4/4.5; }
+.trama-category-image { overflow: hidden; background: var(--soft); aspect-ratio: 4/4.5; border-radius: 10px; }
 .trama-category-image img { height: 100%; transition: transform .4s; }
 .trama-category-card:hover img { transform: scale(1.035); }
 .trama-category-copy { display: flex; align-items: center; justify-content: space-between; padding-top: 17px; }
 .trama-category-copy h3 { font: 600 20px/1.3 'Manrope', sans-serif; letter-spacing: -.045em; }
 .trama-category-copy p { margin-top: 5px; color: var(--muted); font-size: 11px; }
 .trama-category-copy > span { font-size: 26px; }
-.trama-home-wholesale { display: grid; grid-template-columns: 1.3fr .7fr; gap: 50px; align-items: center; padding: 70px 8%; background: var(--brand); color: var(--on-brand); }
+.trama-home-wholesale { display: grid; grid-template-columns: 1.3fr .7fr; gap: 50px; align-items: center; padding: 70px 8%; background: linear-gradient(120deg, var(--brand), var(--brand-blue)); color: var(--on-brand); }
 .trama-home-wholesale h2 { margin: 23px 0; max-width: 700px; }
 .trama-home-wholesale p:not(.eyebrow) { font-size: 13px; color: var(--on-brand-muted); line-height: 1.9; max-width: 420px; }
 .trama-home-wholesale .text-link { margin-top: 20px; }
@@ -130,7 +129,7 @@
 @media (max-width: 800px) {
   .trama-nav { gap: 10px; font-size: 13px; }
   .trama-nav a { padding-block: 12px; }
-  .trama-nav a[aria-current='page'] { border-color: transparent; color: var(--accent); }
+  .trama-nav a[aria-current='page'] { border-color: transparent; }
   .trama-category-grid { gap: 18px; }
   .trama-category-copy h3 { font-size: 17px; }
   .trama-category-copy p { font-size: 9px; }
@@ -161,52 +160,37 @@
   .trama-page-note p:not(.eyebrow) { font-size: 12px; }
 }
 
-/* Keep the mobile campaign in one flexible composition over the photograph. */
 @media (max-width: 800px) {
   [data-trama-page='inicio'] .trama-desktop-only { display: none; }
   [data-trama-page='inicio'] .trama-mobile-only { display: inline; }
 
   [data-trama-page='inicio'] .trama-hero {
     grid-template-columns: minmax(0, 1fr);
-    min-height: clamp(28rem, 70svh, 34rem);
-    background: #1c120c;
-  }
-
-  [data-trama-page='inicio'] .hero-copy,
-  [data-trama-page='inicio'] .hero-image { grid-area: 1 / 1; min-width: 0; }
-
-  [data-trama-page='inicio'] .hero-image {
-    height: auto;
     min-height: 0;
   }
 
-  [data-trama-page='inicio'] .hero-image > img { object-position: 50% 20%; }
-  [data-trama-page='inicio'] .hero-image::after { display: none; }
+  [data-trama-page='inicio'] .hero-image {
+    height: clamp(180px, 37vw, 320px);
+    border-inline-start: 0;
+    border-block-start: 4px solid var(--warm);
+  }
+
+  [data-trama-page='inicio'] .hero-image > img { object-position: 50% 43%; }
 
   [data-trama-page='inicio'] .hero-copy {
-    position: relative;
-    z-index: 1;
-    justify-content: flex-end;
-    padding: 15rem 1.5rem 1.75rem;
-    color: var(--on-brand);
-    background: linear-gradient(180deg, transparent 25%, rgb(28 18 12 / .08) 40%, rgb(28 18 12 / .78) 62%, #1c120c 100%);
+    padding: 2.5rem 6%;
   }
 
   [data-trama-page='inicio'] .hero-copy h1 {
-    max-width: 100%;
-    font-size: clamp(2.5rem, 11vw, 3.25rem);
-    line-height: 1.04;
-    letter-spacing: -.05em;
+    max-width: 19ch;
+    font-size: clamp(2.25rem, 10vw, 4rem);
+    text-wrap: pretty;
     overflow-wrap: anywhere;
   }
 
-  [data-trama-page='inicio'] .hero-copy h1 em { color: inherit; }
   [data-trama-page='inicio'] .hero-description {
-    max-width: none;
-    margin: 12px 0 20px;
-    color: var(--on-brand);
+    margin: 14px 0 22px;
     font-size: .875rem;
-    line-height: 1.6;
   }
 
   [data-trama-page='inicio'] .hero-copy > .trama-button {
@@ -215,19 +199,8 @@
     padding: 14px 18px;
     gap: 24px;
     font-size: .8125rem;
-    background: var(--on-brand);
-    border-color: var(--on-brand);
-    color: #29211c;
   }
 
-  [data-trama-page='inicio'] .hero-copy > .trama-button:hover { background: var(--warm); border-color: var(--warm); }
-  [data-trama-page='inicio'] .hero-copy > .trama-button:focus-visible { outline-color: var(--on-brand); }
-
-  [data-trama-page='inicio'] .hero-copy .eyebrow,
-  [data-trama-page='inicio'] .hero-footnote,
-  [data-trama-page='inicio'] .collection-label,
-  [data-trama-page='inicio'] .hero-image-caption,
-  [data-trama-page='inicio'] .hero-stamp,
   [data-trama-page='inicio'] .value-strip { display: none; }
 
   [data-trama-page='inicio'] .trama-home-categories { padding-block: 28px 48px; }

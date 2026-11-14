@@ -5,8 +5,8 @@ import { products } from '../../src/data/trama';
 import { tramaSupabaseConfigured } from '../../src/lib/trama-supabase';
 
 export const metadata: Metadata = {
-  title: 'La colección — Trama Mayorista',
-  description: 'Explora la colección de Trama Mayorista y reparte las cantidades por talla y color. Prepara un pedido de demostración desde seis prendas combinadas.',
+  title: 'Catálogo',
+  description: 'Explora el catálogo de ropa al por mayor y combina modelos, tallas y colores en un pedido desde 6 prendas.',
 };
 
 const initialProducts = tramaSupabaseConfigured ? [] : products;
@@ -19,8 +19,7 @@ export default function CollectionPage() {
         <nav className="trama-breadcrumbs" aria-label="Ruta de navegación">
           <a href="/">Inicio</a><span aria-hidden="true">/</span><span aria-current="page">La colección</span>
         </nav>
-        <p className="eyebrow">LA COLECCIÓN / 01</p>
-        <h1 id="collection-page-title">Prendas para tu próxima colección.</h1>
+        <h1 id="collection-page-title">Catálogo mayorista</h1>
         <p>Elige una prenda y reparte las cantidades entre sus tallas y colores. Combina tus favoritos en un pedido desde 6 prendas.</p>
       </section>
 
@@ -49,7 +48,7 @@ export default function CollectionPage() {
         </div>
         {tramaSupabaseConfigured && <div id="trama-card-template" hidden><TramaCatalogCard product={products[0]} index={0} /></div>}
         <div id="catalog-empty" className="catalog-empty" hidden><span aria-hidden="true">⌕</span><h3>No encontramos esa combinación.</h3><p>Prueba con otro nombre o cambia la categoría.</p></div>
-        <p className="catalog-note">Precios de muestra por prenda para pedidos de 6 a 23 unidades. Desde 24 prendas se aplica un 10% de descuento; desde 48, un 15%. Puedes combinar modelos, tallas y colores. Las fotografías son referenciales.</p>
+        <p className="catalog-note">Precios por prenda para pedidos de 6 a 23 unidades. Desde 24 prendas se aplica un 10% de descuento y desde 48, un 15%.</p>
       </section>
 
       <section className="trama-next-section section-wrap" aria-labelledby="next-section-title">

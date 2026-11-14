@@ -13,13 +13,13 @@ export function readCampaign(search: string): Campaign | undefined {
 }
 
 /** Keep attribution across local pages and add it to the user's editable WhatsApp draft. */
-export function campaignLink(href: string, pageUrl: string, whatsappBase: string, campaign: Campaign): string {
+export function campaignLink(href: string, pageUrl: string, whatsappBase: string | undefined, campaign: Campaign): string {
   if (!href || href.startsWith('#')) return href;
   let target: URL;
   try { target = new URL(href, pageUrl); } catch { return href; }
   const page = new URL(pageUrl);
-  const contact = new URL(whatsappBase);
-  if (target.origin === contact.origin && target.pathname === contact.pathname && target.protocol === 'https:') {
+  const contact = whatsappBase ? new URL(whatsappBase) : undefined;
+  if (contact && target.origin === contact.origin && target.pathname === contact.pathname && target.protocol === 'https:') {
     const text = target.searchParams.get('text');
     if (!text) return href;
     const marker = '\n\nReferencia de campaña: ';
