@@ -3,7 +3,7 @@ import { MIN_ORDER_QUANTITY, MAX_LINE_QUANTITY, validateOrder, addOrderSelection
 import { tramaSupabaseConfigured } from '../lib/trama-supabase';
 import { loadTramaCatalog } from '../lib/trama-catalog';
 import { tramaColorHex } from '../lib/trama-colors';
-import { BRAND_THEME_COLOR, storeWhatsAppNumber } from '../data/brand';
+import { BRAND_THEME_COLOR, isWhatsAppNumber, type StoreSettings } from '../data/brand';
 
 const STORAGE_KEY = 'trama-mayorista-order-v1';
 const THEME_STORAGE_KEY = 'trama-theme-v1';
@@ -47,7 +47,7 @@ function createCatalogCard(template: HTMLElement, product: TramaProduct, index: 
   return card;
 }
 
-export function initializeTrama(signal: AbortSignal) {
+export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumber }: StoreSettings) {
   const initialProducts = tramaSupabaseConfigured ? [] : products;
   const productById = new Map(initialProducts.map((product) => [product.id, product]));
 
@@ -149,6 +149,7 @@ export function initializeTrama(signal: AbortSignal) {
   const summary = document.querySelector<HTMLElement>('#order-summary');
   const copyButton = document.querySelector<HTMLButtonElement>('#order-copy');
   const whatsappLink = document.querySelector<HTMLAnchorElement>('#order-whatsapp');
+  const hasWhatsApp = isWhatsAppNumber(whatsappNumber);
   const exportArea = document.querySelector<HTMLTextAreaElement>('#order-export');
   const feedback = document.querySelector<HTMLElement>('#order-feedback');
   const orderCatalogStatus = document.getElementById('order-catalog-status');
@@ -189,10 +190,11 @@ export function initializeTrama(signal: AbortSignal) {
     if (summary) summary.hidden = order.length === 0;
     if (copyButton) copyButton.disabled = quantity < MIN_ORDER_QUANTITY;
     if (whatsappLink) {
-      const ready = quantity >= MIN_ORDER_QUANTITY;
+      const ready = hasWhatsApp && quantity >= MIN_ORDER_QUANTITY;
+      whatsappLink.hidden = !hasWhatsApp;
       whatsappLink.setAttribute('aria-disabled', String(!ready));
       whatsappLink.tabIndex = ready ? 0 : -1;
-      if (ready) whatsappLink.href = buildOrderWhatsAppUrl(order, storeWhatsAppNumber, productById);
+      if (ready) whatsappLink.href = buildOrderWhatsAppUrl(order, whatsappNumber, productById, companyName);
       else whatsappLink.removeAttribute('href');
     }
     const values = { '#order-subtotal': formatPrice(subtotal), '#order-discount': `− ${formatPrice(discount)}`, '#order-total': formatPrice(total) };
@@ -531,7 +533,7 @@ export function initializeTrama(signal: AbortSignal) {
   };
   copyButton?.addEventListener('click', () => {
     if (totals().quantity < MIN_ORDER_QUANTITY) return;
-    void copyOrder(buildOrderText(order, productById));
+    void copyOrder(buildOrderText(order, productById, companyName));
   }, { signal });
   whatsappLink?.addEventListener('click', (event) => {
     if (totals().quantity < MIN_ORDER_QUANTITY || !whatsappLink.hasAttribute('href')) {
@@ -540,7 +542,7 @@ export function initializeTrama(signal: AbortSignal) {
       return;
     }
     // Attribution runs in capture phase. Copy the same draft, including its reference.
-    const text = new URL(whatsappLink.href).searchParams.get('text') || buildOrderText(order, productById);
+    const text = new URL(whatsappLink.href).searchParams.get('text') || buildOrderText(order, productById, companyName);
     // Let the native link open immediately; clipboard permissions must not block WhatsApp.
     void copyOrder(text, true);
   }, { signal });

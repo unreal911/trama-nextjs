@@ -1,14 +1,14 @@
-import { storeWhatsAppNumber } from '../data/brand';
+import { isWhatsAppNumber } from '../data/brand';
 import { campaignLink, readCampaign } from '../lib/campaign';
 
-export function initializeCampaignAttribution(signal: AbortSignal) {
+export function initializeCampaignAttribution(signal: AbortSignal, whatsappNumber: string) {
   // No cookies, storage, analytics requests or automatic messages. The campaign stays in URLs.
   const campaign = readCampaign(window.location.search);
   if (campaign) {
+    const whatsappBase = isWhatsAppNumber(whatsappNumber) ? `https://wa.me/${whatsappNumber}` : undefined;
     const updateLink = (link: HTMLAnchorElement) => {
       const href = link.getAttribute('href');
       if (!href || link.hasAttribute('download')) return;
-      const whatsappBase = storeWhatsAppNumber ? `https://wa.me/${storeWhatsAppNumber}` : undefined;
       const attributed = campaignLink(href, window.location.href, whatsappBase, campaign);
       if (attributed !== href) link.setAttribute('href', attributed);
     };

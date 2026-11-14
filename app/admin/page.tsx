@@ -1,14 +1,15 @@
 import type { Metadata } from 'next';
 import { AdminClient } from './admin-client';
 import StoreBrand from '../../src/components/StoreBrand';
-import { STORE_NAME } from '../../src/data/brand';
+import { MAX_COMPANY_NAME_LENGTH } from '../../src/data/brand';
+import { loadStoreSettings } from '../../src/lib/store-settings';
 import '../../src/styles/fonts.css';
 import '../../src/styles/demo-trama.css';
 import '../../src/styles/trama-admin.css';
 
 export const metadata: Metadata = {
   title: 'Administrar catálogo',
-  description: `Panel de administración del catálogo de ${STORE_NAME}.`,
+  description: 'Panel de administración del catálogo y los datos de la empresa.',
   robots: { index: false, follow: false },
 };
 
@@ -56,11 +57,13 @@ const inventoryRow = `
     <button class="trama-admin-button trama-admin-secondary" type="button" data-edit>Editar</button>
   </li>`;
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const { companyName } = await loadStoreSettings();
+
   return (
     <AdminClient>
       <header className="trama-admin-header">
-        <StoreBrand />
+        <StoreBrand companyName={companyName} />
         <a className="trama-admin-link" href="/coleccion">Ver colección <span aria-hidden="true">↗</span></a>
       </header>
       <main className="trama-admin-main">
@@ -83,6 +86,27 @@ export default function AdminPage() {
             <div><h1 id="trama-admin-title" tabIndex={-1}>Catálogo de productos</h1><p id="trama-admin-account" /></div>
             <button className="trama-admin-button trama-admin-secondary" type="button" data-trama-signout>Cerrar sesión</button>
           </div>
+          <section className="trama-admin-card trama-admin-company" aria-labelledby="trama-company-title">
+            <h2 id="trama-company-title">Datos de la empresa</h2>
+            <form id="trama-company-form" method="post">
+              <fieldset disabled>
+                <div className="trama-admin-fields">
+                  <label>Nombre de la empresa
+                    <input name="company_name" autoComplete="organization" maxLength={MAX_COMPANY_NAME_LENGTH} required />
+                  </label>
+                  <label>WhatsApp para pedidos
+                    <input name="whatsapp_number" type="tel" autoComplete="tel" placeholder="+51 980 904 787" maxLength={32} aria-describedby="trama-company-phone-help" required />
+                  </label>
+                </div>
+                <p className="trama-admin-help" id="trama-company-phone-help">Incluye el código de país. Para celulares peruanos también puedes escribir solo los 9 dígitos.</p>
+                <div className="trama-admin-actions">
+                  <button className="trama-admin-button" type="submit">Guardar datos de la empresa</button>
+                </div>
+              </fieldset>
+            </form>
+            <p className="trama-admin-status" id="trama-company-status" role="status" />
+            <button className="trama-admin-button trama-admin-secondary" id="trama-company-retry" type="button" hidden>Volver a cargar los datos</button>
+          </section>
           <div className="trama-admin-grid">
             <section className="trama-admin-card trama-admin-editor" aria-labelledby="trama-editor-title">
               <h2 id="trama-editor-title">Nuevo producto</h2>

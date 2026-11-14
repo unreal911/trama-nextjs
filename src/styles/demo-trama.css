@@ -186,6 +186,8 @@ button,a,input,select,summary {
 .brand-wordmark {
   font: 800 24px/1 'Manrope', sans-serif;
   letter-spacing: -.045em;
+  max-inline-size: min(30vw, 20rem);
+  overflow-wrap: anywhere;
 }
 
 .brand-wordmark small {

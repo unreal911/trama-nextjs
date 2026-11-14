@@ -68,8 +68,17 @@
 
 .trama-admin-auth form,
 .trama-admin-auth [data-trama-signout],
-.trama-admin-editor form {
+.trama-admin-editor form,
+.trama-admin-company form {
   margin-top: 24px;
+}
+
+.trama-admin-company {
+  margin-bottom: 24px;
+}
+
+#trama-company-retry {
+  margin-top: 12px;
 }
 
 .trama-admin-intro {

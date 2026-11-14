@@ -62,7 +62,7 @@ export function summarizeOrder(order: OrderLine[], catalog: Catalog = localCatal
   return { quantity, subtotal: subtotalCents / 100, total: totalCents / 100, discount: (subtotalCents - totalCents) / 100 };
 }
 
-export function buildOrderText(order: OrderLine[], catalog: Catalog = localCatalog): string {
+export function buildOrderText(order: OrderLine[], catalog: Catalog = localCatalog, companyName = STORE_NAME): string {
   const { quantity, subtotal, total, discount } = summarizeOrder(order, catalog);
   if (quantity < MIN_ORDER_QUANTITY) throw new Error(`Completa un mínimo de ${MIN_ORDER_QUANTITY} prendas para copiar tu pedido.`);
   const lines = order.map((line) => {
@@ -72,7 +72,7 @@ export function buildOrderText(order: OrderLine[], catalog: Catalog = localCatal
   });
   return [
     'Hola, quiero estos productos:', '',
-    `${STORE_NAME.toUpperCase()} · PEDIDO MAYORISTA`, '', ...lines, '',
+    `${companyName.toUpperCase()} · PEDIDO MAYORISTA`, '', ...lines, '',
     `Cantidad: ${quantity} prendas`, `Subtotal: ${formatPrice(subtotal)}`,
     `Descuento (${getDiscountRate(quantity) * 100}%): ${formatPrice(discount)}`,
     `Total referencial: ${formatPrice(total)}`, '',
@@ -80,9 +80,14 @@ export function buildOrderText(order: OrderLine[], catalog: Catalog = localCatal
   ].join('\n');
 }
 
-export function buildOrderWhatsAppUrl(order: OrderLine[], number: string, catalog: Catalog = localCatalog): string {
+export function buildOrderWhatsAppUrl(
+  order: OrderLine[],
+  number: string,
+  catalog: Catalog = localCatalog,
+  companyName = STORE_NAME,
+): string {
   if (!isWhatsAppNumber(number)) throw new Error('Configura el WhatsApp de la tienda con código de país y solo dígitos.');
   const url = new URL(`https://wa.me/${number}`);
-  url.searchParams.set('text', buildOrderText(order, catalog));
+  url.searchParams.set('text', buildOrderText(order, catalog, companyName));
   return url.href;
 }

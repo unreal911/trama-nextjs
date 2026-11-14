@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import type { StoreSettings } from '../data/brand';
 import { initializeCampaignAttribution } from '../scripts/campaign-attribution';
 import { initializeTrama } from '../scripts/trama-mayorista';
 
@@ -11,7 +12,7 @@ const legacyRoutes = new Map([
   ['#preguntas', '/como-comprar#preguntas'],
 ]);
 
-export default function StorefrontRuntime() {
+export default function StorefrontRuntime({ settings }: { settings: StoreSettings }) {
   useEffect(() => {
     const legacyDestination = window.location.pathname === '/' ? legacyRoutes.get(window.location.hash) : undefined;
     if (legacyDestination) {
@@ -22,10 +23,10 @@ export default function StorefrontRuntime() {
     }
 
     const controller = new AbortController();
-    initializeCampaignAttribution(controller.signal);
-    initializeTrama(controller.signal);
+    initializeCampaignAttribution(controller.signal, settings.whatsappNumber);
+    initializeTrama(controller.signal, settings);
     return () => controller.abort();
-  }, []);
+  }, [settings]);
 
   return null;
 }

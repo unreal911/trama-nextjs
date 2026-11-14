@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
 import Storefront from '../../src/components/Storefront';
-import { STORE_NAME } from '../../src/data/brand';
 
 export const metadata: Metadata = {
   title: 'Compra al por mayor',
-  description: `Compra ropa al por mayor desde 6 prendas combinadas. Conoce los descuentos por volumen de ${STORE_NAME} desde 24 y 48 prendas.`,
+  description: 'Compra ropa al por mayor desde 6 prendas combinadas. Conoce los descuentos por volumen desde 24 y 48 prendas.',
 };
 
 export default function WholesalePage() {

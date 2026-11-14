@@ -3,7 +3,7 @@ import '../styles/fonts.css';
 import '../styles/demo-trama.css';
 import '../styles/trama-pages.css';
 import '../styles/trama-product-picker.css';
-import { STORE_NAME, storeWhatsAppNumber } from '../data/brand';
+import { loadStoreSettings } from '../lib/store-settings';
 import StoreBrand from './StoreBrand';
 import StorefrontRuntime from './StorefrontRuntime';
 import TramaProductPicker from './TramaProductPicker';
@@ -32,15 +32,17 @@ interface Props {
   children: ReactNode;
 }
 
-export default function Storefront({ currentPage, children }: Props) {
+export default async function Storefront({ currentPage, children }: Props) {
+  const settings = await loadStoreSettings();
+  const { companyName, whatsappNumber } = settings;
   return (
     <div data-trama-page={currentPage}>
       <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      <StorefrontRuntime />
+      <StorefrontRuntime settings={settings} />
       <a className="skip-link" href="#contenido">Saltar al contenido</a>
       <div className="announcement">Venta al por mayor desde <strong>6 prendas</strong><span> · </span>Combina modelos, tallas y colores.</div>
       <header className="trama-header">
-        <StoreBrand />
+        <StoreBrand companyName={companyName} />
         <nav id="trama-nav" className="trama-nav" aria-label="Navegación principal">
           {navigation.map((item) => <a key={item.key} href={item.href} aria-current={currentPage === item.key ? 'page' : undefined}>{item.label}</a>)}
         </nav>
@@ -59,12 +61,12 @@ export default function Storefront({ currentPage, children }: Props) {
 
       <footer className="trama-footer">
         <div className="footer-top">
-          <StoreBrand />
+          <StoreBrand companyName={companyName} />
           <p>Confección y venta<br />de ropa al por mayor.</p>
           <nav aria-label="Navegación del pie de página">{navigation.map((item) => <a key={item.key} href={item.href} aria-current={currentPage === item.key ? 'page' : undefined}>{item.label}</a>)}</nav>
           <button type="button" className="text-link" data-open-order>Ver mi pedido <span aria-hidden="true">↗</span></button>
         </div>
-        <div className="footer-bottom"><span>© {new Date().getFullYear()} {STORE_NAME}</span></div>
+        <div className="footer-bottom"><span>© {new Date().getFullYear()} {companyName}</span></div>
       </footer>
 
       <TramaProductPicker />
@@ -77,10 +79,10 @@ export default function Storefront({ currentPage, children }: Props) {
           <div className="order-tier-note" id="order-tier-note"></div>
           <dl className="order-totals"><div><dt>Subtotal</dt><dd id="order-subtotal">S/ 0.00</dd></div><div><dt>Descuento por volumen</dt><dd id="order-discount">S/ 0.00</dd></div><div className="order-grand-total"><dt>Total referencial</dt><dd id="order-total">S/ 0.00</dd></div></dl>
           <div className="order-actions">
-            {storeWhatsAppNumber && <a id="order-whatsapp" className="trama-button" role="link" aria-disabled="true" tabIndex={-1} target="_blank" rel="noopener noreferrer" aria-describedby="order-copy-note">Copiar y enviar por WhatsApp <span aria-hidden="true">↗</span></a>}
+            {whatsappNumber && <a id="order-whatsapp" className="trama-button" role="link" aria-disabled="true" tabIndex={-1} target="_blank" rel="noopener noreferrer" aria-describedby="order-copy-note">Copiar y enviar por WhatsApp <span aria-hidden="true">↗</span></a>}
             <button type="button" id="order-copy" className="trama-button">Copiar resumen <span aria-hidden="true">⧉</span></button>
           </div>
-          <p className="order-copy-note" id="order-copy-note">Confirma la disponibilidad y coordina la entrega con {STORE_NAME}.</p>
+          <p className="order-copy-note" id="order-copy-note">Confirma la disponibilidad y coordina la entrega con {companyName}.</p>
         </div>
         <p id="order-feedback" role="status" aria-live="polite"></p><label className="sr-only" htmlFor="order-export">Resumen del pedido para copiar manualmente</label><textarea id="order-export" readOnly hidden></textarea>
       </dialog>

@@ -93,6 +93,16 @@ test('incomplete orders and incorrectly formatted store contacts cannot create a
   assert.equal(new URL(buildOrderWhatsAppUrl([polo(6)], '51999999999')).pathname, '/51999999999');
 });
 
+test('the edited company name and phone are used when sharing an order', () => {
+  const order = [polo(6)];
+  const companyName = 'Textiles del Perú';
+  const text = buildOrderText(order, undefined, companyName);
+  const url = new URL(buildOrderWhatsAppUrl(order, '51911111111', undefined, companyName));
+  assert.match(text, /TEXTILES DEL PERÚ · PEDIDO MAYORISTA/);
+  assert.equal(url.pathname, '/51911111111');
+  assert.equal(url.searchParams.get('text'), text);
+});
+
 test('uses newly published products and their current prices throughout the order', () => {
   const product = { id: 'polo-nuevo', name: 'Polo nuevo', price: 28.5, colors: ['Ocre'], sizes: ['M'] };
   const catalog = new Map([[product.id, product]]);

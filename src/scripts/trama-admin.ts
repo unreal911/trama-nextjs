@@ -1,6 +1,7 @@
 import type { Session } from '@supabase/supabase-js';
 import { formatPrice, type TramaProduct } from '../data/trama';
 import { createTramaClient } from '../lib/trama-supabase';
+import { mountCompanySettings } from './trama-admin-company';
 import { mountTramaAdminVariants } from './trama-admin-variants';
 
 type CatalogProduct = TramaProduct & { published: boolean };
@@ -47,7 +48,7 @@ function newId(name: string) {
   return `${slug || 'producto'}-${suffix}`;
 }
 
-export function mountTramaAdmin(root: HTMLElement) {
+export function mountTramaAdmin(root: HTMLElement, onCompanySaved: () => void) {
   const authView = root.querySelector<HTMLElement>('#trama-admin-auth')!;
   const authStatus = root.querySelector<HTMLParagraphElement>('#trama-auth-status')!;
   const login = root.querySelector<HTMLFormElement>('#trama-admin-login')!;
@@ -97,6 +98,7 @@ export function mountTramaAdmin(root: HTMLElement) {
   const colors = mountTramaAdminVariants(root, signal, (busy) => {
     submit.disabled = busy;
   });
+  const company = mountCompanySettings(root, client, signal, onCompanySaved);
 
   const images = client.storage.from(photoBucket);
 
@@ -232,6 +234,7 @@ export function mountTramaAdmin(root: HTMLElement) {
       colors.setPhotosEnabled(false);
       setStatus(migrationStatus, '');
       resetEditor();
+      company.reset();
       inventory.replaceChildren();
       setStatus(inventoryStatus, '');
     }
@@ -253,7 +256,9 @@ export function mountTramaAdmin(root: HTMLElement) {
       const version = sessionVersion;
       // Supabase auth callbacks run while the client updates its session.
       window.setTimeout(() => {
-        if (!signal.aborted && version === sessionVersion) void loadProducts();
+        if (signal.aborted || version !== sessionVersion) return;
+        void company.load();
+        void loadProducts();
       }, 0);
     }
   }

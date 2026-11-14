@@ -6,7 +6,9 @@ Tienda en Next.js con catálogo, pedido mayorista y panel de productos. Usa Supa
 
 Requiere Node.js 22.18 o posterior. Crea un archivo `.env.local` en la raíz del proyecto con `NEXT_PUBLIC_TRAMA_SUPABASE_URL` y `NEXT_PUBLIC_TRAMA_SUPABASE_ANON_KEY`. Usa la URL y la clave pública del proyecto de Supabase existente.
 
-Para habilitar «Copiar y enviar por WhatsApp», configura `NEXT_PUBLIC_STORE_WHATSAPP_NUMBER` con el número oficial de la tienda, incluido el código de país, solo con dígitos. En Netlify, añade las variables en **Project configuration → Environment variables** con alcance **Builds** y ejecuta un nuevo despliegue.
+En Netlify, añade las variables públicas de Supabase en **Project configuration → Environment variables** con alcance **Builds** y ejecuta un nuevo despliegue.
+
+Para editar el nombre y el WhatsApp desde **Administrar catálogo → Datos de la empresa**, ejecuta [somos_store_settings.sql](supabase/somos_store_settings.sql) en SQL Editor. El nombre y el número guardados aparecen en la tienda y sus pedidos al abrir o recargar la página.
 
 ```powershell
 npm install
@@ -25,6 +27,7 @@ En un proyecto Supabase nuevo, ejecuta estos archivos en orden:
 2. [trama_product_color_hexes.sql](supabase/trama_product_color_hexes.sql)
 3. [trama_product_images.sql](supabase/trama_product_images.sql)
 4. [trama_product_color_images.sql](supabase/trama_product_color_images.sql)
+5. [somos_store_settings.sql](supabase/somos_store_settings.sql)
 
 Las cuentas administradoras usan el permiso `trama_admin`. Para crear una, confirma el correo del usuario en **Authentication → Users** y asigna el permiso en `app_metadata` desde SQL Editor con el UUID correspondiente:
 

@@ -1,13 +1,14 @@
 import type { Metadata } from 'next';
 import Storefront from '../../src/components/Storefront';
-import { STORE_NAME } from '../../src/data/brand';
+import { loadStoreSettings } from '../../src/lib/store-settings';
 
 export const metadata: Metadata = {
   title: 'Cómo comprar',
-  description: `Elige modelos, tallas y colores desde 6 prendas y prepara tu pedido en ${STORE_NAME}.`,
+  description: 'Elige modelos, tallas y colores y prepara tu pedido desde 6 prendas.',
 };
 
-export default function PurchasePage() {
+export default async function PurchasePage() {
+  const { companyName } = await loadStoreSettings();
   return (
     <Storefront currentPage="como-comprar">
       <section className="trama-page-intro section-wrap" aria-labelledby="como-comprar-page-title">
@@ -35,7 +36,7 @@ export default function PurchasePage() {
           <details><summary>¿Cómo se aplica el descuento?<span aria-hidden="true">+</span></summary><p>De 6 a 23 prendas se utiliza el precio mayorista mostrado. Desde 24 prendas, todo el pedido recibe un 10% de descuento. Desde 48 prendas, recibe un 15%. Los descuentos no se acumulan.</p></details>
           <details><summary>¿Puedo combinar tallas y colores?<span aria-hidden="true">+</span></summary><p>Sí. Abre una prenda y elige un color para ver sus tallas. Indica las cantidades y cambia de color para añadir otras combinaciones: las que ya elegiste se conservan mientras preparas la selección. Por ejemplo, puedes combinar 2 polos crudos en M, 1 crudo en L y 3 negros en S. Pulsa el botón de añadir cuando termines.</p></details>
           <details><summary>¿Cómo comparto mi selección?<span aria-hidden="true">+</span></summary><p>Con al menos 6 prendas, pulsa «Copiar resumen» en «Mi pedido». El resumen incluye modelos, colores, tallas, cantidades y total. Si aparece «Copiar y enviar por WhatsApp», abre el chat, revisa el mensaje y pulsa «Enviar».</p><p>Si tu navegador bloquea la copia automática, podrás seleccionar el resumen y copiarlo manualmente.</p></details>
-          <details><summary>¿Cómo confirmo mi pedido?<span aria-hidden="true">+</span></summary><p>Comparte el resumen con {STORE_NAME} para confirmar disponibilidad, precio final y condiciones de entrega. La confirmación y el pago se coordinan con la tienda.</p></details>
+          <details><summary>¿Cómo confirmo mi pedido?<span aria-hidden="true">+</span></summary><p>Comparte el resumen con {companyName} para confirmar disponibilidad, precio final y condiciones de entrega. La confirmación y el pago se coordinan con la tienda.</p></details>
         </div>
       </section>
 
