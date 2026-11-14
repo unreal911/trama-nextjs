@@ -1,0 +1,48 @@
+import type { Metadata } from 'next';
+import Storefront from '../../src/components/Storefront';
+
+export const metadata: Metadata = {
+  title: 'Cómo comprar — Trama Mayorista',
+  description: 'Combina tallas y colores desde 6 prendas. Copia tu resumen de demostración y abre WhatsApp para revisarlo y enviarlo a Nubicore.',
+};
+
+export default function PurchasePage() {
+  return (
+    <Storefront currentPage="como-comprar">
+      <section className="trama-page-intro section-wrap" aria-labelledby="como-comprar-page-title">
+        <nav className="trama-breadcrumbs" aria-label="Ruta de navegación"><a href="/">Inicio</a><span aria-hidden="true">/</span><span aria-current="page">Cómo comprar</span></nav>
+        <p className="eyebrow">UNA BUENA COLECCIÓN EMPIEZA AQUÍ</p>
+        <h1 id="como-comprar-page-title">De tu primera prenda<br /><em>a tu próximo paso.</em></h1>
+        <p>Encuentra tus favoritos, combina tallas y colores y reúne al menos 6 prendas en «Mi pedido». Con «Copiar y enviar por WhatsApp» preparas el resumen y abres el chat de Nubicore para revisarlo y pulsar «Enviar». Es una demostración, sin compras reales.</p>
+      </section>
+
+      <section className="how-to section-wrap" id="como-comprar" aria-labelledby="how-title">
+        <div className="section-heading">
+          <div><p className="eyebrow">ASÍ DE SIMPLE</p><h2 id="how-title">De la colección<br /><em>a tu próximo paso.</em></h2></div>
+          <a className="text-link" href="/como-comprar#preguntas">Resolvemos tus dudas <span aria-hidden="true">↘</span></a>
+        </div>
+        <div className="steps-grid">
+          <article><span className="step-number">01 <i aria-hidden="true">↗</i></span><h3>Encuentra tu estilo.</h3><p>Explora las categorías y elige las prendas que van con tu negocio.</p></article>
+          <article><span className="step-number">02 <i aria-hidden="true">+</i></span><h3>Hazlo a tu manera.</h3><p>Abre una prenda, elige un color e indica cuántas unidades quieres de cada talla. Puedes cambiar de color y seguir combinando antes de añadir la selección.</p></article>
+          <article><span className="step-number">03 <i aria-hidden="true">✓</i></span><h3>Revisa y comparte.</h3><p>Abre «Mi pedido» y comprueba las cantidades y el total. Con al menos 6 prendas, pulsa «Copiar y enviar por WhatsApp». El chat de Nubicore se abre con el mensaje preparado; revísalo y pulsa «Enviar» en WhatsApp.</p></article>
+        </div>
+      </section>
+
+      <section className="faq section-wrap" id="preguntas" aria-labelledby="faq-title">
+        <div><p className="eyebrow">LO QUE QUIERES SABER</p><h2 id="faq-title">Todo claro.<br /><em>Desde el inicio.</em></h2><p>Una buena colección empieza<br />con una buena decisión.</p></div>
+        <div className="faq-list">
+          <details><summary>¿Cuál es el pedido mínimo?<span aria-hidden="true">+</span></summary><p>El mínimo es de 6 prendas en el pedido completo. Puedes repartirlas entre modelos, colores y tallas y ajustar cada variante por unidad. Una selección menor se guarda como borrador; completa las 6 prendas para copiar el resumen o prepararlo en WhatsApp.</p></details>
+          <details><summary>¿Cómo se aplica el descuento?<span aria-hidden="true">+</span></summary><p>De 6 a 23 prendas se utiliza el precio mayorista mostrado. Desde 24 prendas, todo el pedido recibe un 10% de descuento. Desde 48 prendas, recibe un 15%. Los descuentos no se acumulan.</p></details>
+          <details><summary>¿Puedo combinar tallas y colores?<span aria-hidden="true">+</span></summary><p>Sí. Abre una prenda y elige un color para ver sus tallas. Indica las cantidades y cambia de color para añadir otras combinaciones: las que ya elegiste se conservan mientras preparas la selección. Por ejemplo, puedes combinar 2 polos crudos en M, 1 crudo en L y 3 negros en S. Pulsa el botón de añadir cuando termines.</p></details>
+          <details><summary>¿Cómo comparto mi selección?<span aria-hidden="true">+</span></summary><p>Con al menos 6 prendas, pulsa «Copiar y enviar por WhatsApp» en «Mi pedido». Se copia un resumen con saludo, modelos, colores, tallas, cantidades y total de muestra. Se abre el chat de Nubicore con ese mensaje preparado: revísalo y pulsa «Enviar» en WhatsApp. La web no lo envía automáticamente.</p><p>También puedes copiar el resumen sin abrir WhatsApp. Si tu navegador no permite la copia automática, podrás seleccionarlo y copiarlo manualmente.</p></details>
+          <details><summary>¿Esta tienda acepta pedidos reales?<span aria-hidden="true">+</span></summary><p>Trama es una marca conceptual creada por Nubicore. El chat se dirige al WhatsApp de Nubicore para probar esta demostración o conversar sobre un catálogo para tu negocio. El mensaje no confirma una compra. Los productos, precios y condiciones son ilustrativos; no se procesan compras, pagos ni envíos de prendas.</p></details>
+        </div>
+      </section>
+
+      <section className="trama-page-note section-wrap" aria-labelledby="empezar-title">
+        <div><p className="eyebrow">TU PRÓXIMA COLECCIÓN TE ESPERA</p><h2 id="empezar-title">Elige tus primeras prendas.<br /><em>Dale forma a tu idea.</em></h2><p>Encuentra las prendas que van contigo y construye tu selección a tu ritmo.</p></div>
+        <a className="trama-button" href="/coleccion">Explorar la colección <span aria-hidden="true">↗</span></a>
+      </section>
+    </Storefront>
+  );
+}
