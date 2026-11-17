@@ -7,7 +7,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const { companyName } = await loadStoreSettings();
   return {
     title: { default: companyName, template: `%s | ${companyName}` },
-    description: 'Ropa al por mayor desde 6 prendas combinadas. Explora el catálogo y arma tu pedido por modelo, talla y color.',
+    description: 'Ropa al por mayor. Explora el catálogo y arma tu pedido por modelo, talla y color.',
     robots: { index: false, follow: true },
   };
 }

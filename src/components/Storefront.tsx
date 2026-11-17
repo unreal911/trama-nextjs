@@ -4,6 +4,8 @@ import '../styles/demo-trama.css';
 import '../styles/trama-pages.css';
 import '../styles/trama-product-picker.css';
 import { loadStoreSettings } from '../lib/store-settings';
+import { loadWholesaleSettings } from '../lib/wholesale-settings';
+import { formatGarments } from '../data/wholesale';
 import StoreBrand from './StoreBrand';
 import StorefrontRuntime from './StorefrontRuntime';
 import TramaProductPicker from './TramaProductPicker';
@@ -33,14 +35,15 @@ interface Props {
 }
 
 export default async function Storefront({ currentPage, children }: Props) {
-  const settings = await loadStoreSettings();
+  const [settings, { pricing }] = await Promise.all([loadStoreSettings(), loadWholesaleSettings()]);
   const { companyName, whatsappNumber } = settings;
+  const minimum = formatGarments(pricing.minimum);
   return (
     <div data-trama-page={currentPage}>
       <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      <StorefrontRuntime settings={settings} />
+      <StorefrontRuntime settings={settings} pricing={pricing} />
       <a className="skip-link" href="#contenido">Saltar al contenido</a>
-      <div className="announcement">Venta al por mayor desde <strong>6 prendas</strong><span> · </span>Combina modelos, tallas y colores.</div>
+      <div className="announcement">Venta al por mayor desde <strong>{minimum}</strong><span> · </span>Combina modelos, tallas y colores.</div>
       <header className="trama-header">
         <StoreBrand companyName={companyName} />
         <nav id="trama-nav" className="trama-nav" aria-label="Navegación principal">
@@ -73,11 +76,11 @@ export default async function Storefront({ currentPage, children }: Props) {
       <dialog id="order-dialog" aria-labelledby="order-title">
         <div className="order-heading"><h2 id="order-title">Mi pedido</h2><button type="button" id="close-order" aria-label="Cerrar mi pedido">×</button></div>
         <p id="order-catalog-status" role="status" hidden></p>
-        <div id="order-empty"><h3>Tu pedido está vacío</h3><p>Elige al menos 6 prendas combinando modelos, tallas y colores.</p><a className="text-link" href="/coleccion">Ir a la colección <span aria-hidden="true">↗</span></a></div>
+        <div id="order-empty"><h3>Tu pedido está vacío</h3><p>Elige al menos {minimum} combinando modelos, tallas y colores.</p><a className="text-link" href="/coleccion">Ir a la colección <span aria-hidden="true">↗</span></a></div>
         <div id="order-items"></div>
         <div id="order-summary" hidden>
-          <div className="order-tier-note" id="order-tier-note"></div>
-          <dl className="order-totals"><div><dt>Subtotal</dt><dd id="order-subtotal">S/ 0.00</dd></div><div><dt>Descuento por volumen</dt><dd id="order-discount">S/ 0.00</dd></div><div className="order-grand-total"><dt>Total referencial</dt><dd id="order-total">S/ 0.00</dd></div></dl>
+          <div className="order-minimum-note" id="order-minimum-note" hidden></div>
+          <dl className="order-totals"><div className="order-grand-total"><dt>Total referencial</dt><dd id="order-total">S/ 0.00</dd></div></dl>
           <div className="order-actions">
             {whatsappNumber && <a id="order-whatsapp" className="trama-button" role="link" aria-disabled="true" tabIndex={-1} target="_blank" rel="noopener noreferrer" aria-describedby="order-copy-note">Copiar y enviar por WhatsApp <span aria-hidden="true">↗</span></a>}
             <button type="button" id="order-copy" className="trama-button">Copiar resumen <span aria-hidden="true">⧉</span></button>

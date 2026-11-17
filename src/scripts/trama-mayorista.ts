@@ -1,9 +1,10 @@
-import { products, getUnitPrice, formatPrice, type TramaProduct } from '../data/trama';
-import { MIN_ORDER_QUANTITY, MAX_LINE_QUANTITY, validateOrder, addOrderSelection, summarizeOrder, buildOrderText, buildOrderWhatsAppUrl, type OrderLine } from '../lib/trama-order';
+import { products, formatPrice, type TramaProduct } from '../data/trama';
+import { MAX_LINE_QUANTITY, validateOrder, addOrderSelection, summarizeOrder, buildOrderText, buildOrderWhatsAppUrl, type OrderLine } from '../lib/trama-order';
 import { tramaSupabaseConfigured } from '../lib/trama-supabase';
 import { loadTramaCatalog } from '../lib/trama-catalog';
 import { tramaColorHex } from '../lib/trama-colors';
 import { BRAND_THEME_COLOR, isWhatsAppNumber, type StoreSettings } from '../data/brand';
+import { defaultWholesalePricing, formatGarments } from '../data/wholesale';
 
 const STORAGE_KEY = 'trama-mayorista-order-v1';
 const THEME_STORAGE_KEY = 'trama-theme-v1';
@@ -47,7 +48,8 @@ function createCatalogCard(template: HTMLElement, product: TramaProduct, index: 
   return card;
 }
 
-export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumber }: StoreSettings) {
+export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumber }: StoreSettings, pricing = defaultWholesalePricing) {
+  const { minimum } = pricing;
   const initialProducts = tramaSupabaseConfigured ? [] : products;
   const productById = new Map(initialProducts.map((product) => [product.id, product]));
 
@@ -180,7 +182,7 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
   };
 
   const renderOrder = () => {
-    const { quantity, subtotal, total, discount } = totals();
+    const { quantity, total } = totals();
     const countElements = new Set(document.querySelectorAll<HTMLElement>('[data-order-count], #order-count'));
     countElements.forEach((element) => { element.textContent = String(quantity); });
     document.querySelectorAll<HTMLButtonElement>('[data-open-order]').forEach((button) => {
@@ -188,29 +190,23 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
     });
     if (empty) empty.hidden = !catalogReady || order.length > 0;
     if (summary) summary.hidden = order.length === 0;
-    if (copyButton) copyButton.disabled = quantity < MIN_ORDER_QUANTITY;
+    if (copyButton) copyButton.disabled = quantity < minimum;
     if (whatsappLink) {
-      const ready = hasWhatsApp && quantity >= MIN_ORDER_QUANTITY;
+      const ready = hasWhatsApp && quantity >= minimum;
       whatsappLink.hidden = !hasWhatsApp;
       whatsappLink.setAttribute('aria-disabled', String(!ready));
       whatsappLink.tabIndex = ready ? 0 : -1;
-      if (ready) whatsappLink.href = buildOrderWhatsAppUrl(order, whatsappNumber, productById, companyName);
+      if (ready) whatsappLink.href = buildOrderWhatsAppUrl(order, whatsappNumber, productById, companyName, pricing);
       else whatsappLink.removeAttribute('href');
     }
-    const values = { '#order-subtotal': formatPrice(subtotal), '#order-discount': `− ${formatPrice(discount)}`, '#order-total': formatPrice(total) };
-    Object.entries(values).forEach(([selector, text]) => {
-      const element = document.querySelector<HTMLElement>(selector);
-      if (element) element.textContent = text;
-    });
-    const tierNote = document.querySelector<HTMLElement>('#order-tier-note');
-    if (tierNote) {
-      tierNote.textContent = quantity < MIN_ORDER_QUANTITY
-        ? `Agrega ${MIN_ORDER_QUANTITY - quantity} ${MIN_ORDER_QUANTITY - quantity === 1 ? 'prenda' : 'prendas'} para completar el mínimo de 6. Puedes combinar modelos, colores y tallas.`
-        : quantity >= 48
-        ? 'Tienes 15% de descuento en todo tu pedido.'
-        : quantity >= 24
-          ? `Tienes 10% de descuento. Agrega ${48 - quantity} prendas para obtener 15%.`
-          : `Agrega ${24 - quantity} prendas para obtener 10% de descuento.`;
+    const totalElement = document.getElementById('order-total');
+    if (totalElement) totalElement.textContent = formatPrice(total);
+    const minimumNote = document.getElementById('order-minimum-note');
+    if (minimumNote) {
+      minimumNote.hidden = quantity >= minimum;
+      minimumNote.textContent = quantity < minimum
+        ? `Agrega ${formatGarments(minimum - quantity)} para completar el mínimo de ${minimum}. Puedes combinar modelos, colores y tallas.`
+        : '';
     }
     if (!items) return;
     const fragment = document.createDocumentFragment();
@@ -255,7 +251,8 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
       remove.setAttribute('aria-label', `Quitar ${product.name}, ${line.color}, talla ${line.size} del pedido`);
       copy.append(name, variant, quantityControl, remove);
       const price = createElement('div', 'order-item-price');
-      price.append(createElement('strong', '', formatPrice(getUnitPrice(product.price, quantity) * line.qty)), createElement('small', '', `${formatPrice(getUnitPrice(product.price, quantity))} / und.`));
+      const unitPrice = product.price;
+      price.append(createElement('strong', '', formatPrice(unitPrice * line.qty)), createElement('small', '', `${formatPrice(unitPrice)} / und.`));
       item.append(image, copy, price);
       fragment.append(item);
     });
@@ -294,13 +291,14 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
     if (!selectedProduct) return;
     const quantity = draft.reduce((sum, line) => sum + line.qty, 0);
     const combinedQuantity = totals().quantity + quantity;
-    const unitPrice = getUnitPrice(selectedProduct.price, combinedQuantity);
+    const unitPrice = selectedProduct.price;
     pickerText('product-picker-quantity', String(quantity));
     pickerText('product-picker-unit-price', formatPrice(unitPrice));
     pickerText('product-picker-total', formatPrice(Math.round(unitPrice * 100) * quantity / 100));
-    pickerText('product-picker-tier-note', combinedQuantity < MIN_ORDER_QUANTITY
-      ? `Con esta selección tendrás ${combinedQuantity} prendas en tu pedido. Faltan ${MIN_ORDER_QUANTITY - combinedQuantity} para el mínimo de 6; puedes añadir otros modelos.`
-      : `Con esta selección tendrás ${combinedQuantity} prendas en tu pedido. ${combinedQuantity >= 48 ? '15% de descuento' : combinedQuantity >= 24 ? '10% de descuento' : 'Precio mayorista base'} en todas las prendas.`);
+    const combinedNote = `Con esta selección tendrás ${formatGarments(combinedQuantity)} en tu pedido.`;
+    pickerText('product-picker-quantity-note', combinedQuantity < minimum
+      ? `${combinedNote} Faltan ${minimum - combinedQuantity} para el mínimo de ${minimum}. Puedes añadir otros modelos.`
+      : combinedNote);
     pickerColors?.querySelectorAll<HTMLButtonElement>('[data-picker-color]').forEach((button) => {
       const color = button.dataset.pickerColor!;
       const count = draft.filter((line) => line.color === color).reduce((sum, line) => sum + line.qty, 0);
@@ -532,17 +530,17 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
     }
   };
   copyButton?.addEventListener('click', () => {
-    if (totals().quantity < MIN_ORDER_QUANTITY) return;
-    void copyOrder(buildOrderText(order, productById, companyName));
+    if (totals().quantity < minimum) return;
+    void copyOrder(buildOrderText(order, productById, companyName, pricing));
   }, { signal });
   whatsappLink?.addEventListener('click', (event) => {
-    if (totals().quantity < MIN_ORDER_QUANTITY || !whatsappLink.hasAttribute('href')) {
+    if (totals().quantity < minimum || !whatsappLink.hasAttribute('href')) {
       event.preventDefault();
-      announce(`Completa un mínimo de ${MIN_ORDER_QUANTITY} prendas para compartir tu pedido.`);
+      announce(`Completa un mínimo de ${formatGarments(minimum)} para compartir tu pedido.`);
       return;
     }
     // Attribution runs in capture phase. Copy the same draft, including its reference.
-    const text = new URL(whatsappLink.href).searchParams.get('text') || buildOrderText(order, productById, companyName);
+    const text = new URL(whatsappLink.href).searchParams.get('text') || buildOrderText(order, productById, companyName, pricing);
     // Let the native link open immediately; clipboard permissions must not block WhatsApp.
     void copyOrder(text, true);
   }, { signal });

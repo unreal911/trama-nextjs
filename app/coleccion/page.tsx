@@ -2,17 +2,20 @@ import type { Metadata } from 'next';
 import Storefront from '../../src/components/Storefront';
 import TramaCatalogCard from '../../src/components/TramaCatalogCard';
 import { products } from '../../src/data/trama';
+import { formatGarments } from '../../src/data/wholesale';
 import { tramaSupabaseConfigured } from '../../src/lib/trama-supabase';
+import { loadWholesaleSettings } from '../../src/lib/wholesale-settings';
 
 export const metadata: Metadata = {
   title: 'Catálogo',
-  description: 'Explora el catálogo de ropa al por mayor y combina modelos, tallas y colores en un pedido desde 6 prendas.',
+  description: 'Explora el catálogo de ropa al por mayor y combina modelos, tallas y colores en tu pedido.',
 };
 
 const initialProducts = tramaSupabaseConfigured ? [] : products;
 const count = initialProducts.length;
 
-export default function CollectionPage() {
+export default async function CollectionPage() {
+  const { pricing } = await loadWholesaleSettings();
   return (
     <Storefront currentPage="coleccion">
       <section className="trama-page-intro section-wrap" aria-labelledby="collection-page-title">
@@ -20,7 +23,7 @@ export default function CollectionPage() {
           <a href="/">Inicio</a><span aria-hidden="true">/</span><span aria-current="page">La colección</span>
         </nav>
         <h1 id="collection-page-title">Catálogo mayorista</h1>
-        <p>Elige una prenda y reparte las cantidades entre sus tallas y colores. Combina tus favoritos en un pedido desde 6 prendas.</p>
+        <p>Elige una prenda y reparte las cantidades entre sus tallas y colores. Combina tus favoritos en un pedido desde {formatGarments(pricing.minimum)}.</p>
       </section>
 
       <section className="catalog section-wrap" id="coleccion" aria-labelledby="catalog-title">
@@ -48,12 +51,6 @@ export default function CollectionPage() {
         </div>
         {tramaSupabaseConfigured && <div id="trama-card-template" hidden><TramaCatalogCard product={products[0]} index={0} /></div>}
         <div id="catalog-empty" className="catalog-empty" hidden><span aria-hidden="true">⌕</span><h3>No encontramos esa combinación.</h3><p>Prueba con otro nombre o cambia la categoría.</p></div>
-        <p className="catalog-note">Precios por prenda para pedidos de 6 a 23 unidades. Desde 24 prendas se aplica un 10% de descuento y desde 48, un 15%.</p>
-      </section>
-
-      <section className="trama-next-section section-wrap" aria-labelledby="next-section-title">
-        <div><p className="eyebrow">EL PRECIO TAMBIÉN IMPORTA</p><h2 id="next-section-title">Tu pedido crece. Tu precio mejora.</h2></div>
-        <a className="trama-button" href="/mayoristas">Conoce los precios por volumen <span aria-hidden="true">↗</span></a>
       </section>
     </Storefront>
   );

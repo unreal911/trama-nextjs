@@ -37,7 +37,7 @@ export default function TramaProductPicker() {
       <footer className="picker-footer">
         <div className="picker-summary">
           <p><strong id="product-picker-quantity">0</strong> prendas seleccionadas <span>· <b id="product-picker-unit-price">S/ 0.00</b> c/u</span></p>
-          <p id="product-picker-tier-note" className="picker-tier-note"></p>
+          <p id="product-picker-quantity-note" className="picker-quantity-note"></p>
         </div>
         <div className="picker-checkout"><div><span>Subtotal de esta selección</span><strong id="product-picker-total">S/ 0.00</strong></div><button type="button" id="product-picker-add" className="trama-button" disabled>Añadir al pedido <span aria-hidden="true">+</span></button></div>
         <p id="product-picker-feedback" role="status" aria-live="polite"></p>

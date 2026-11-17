@@ -2,6 +2,8 @@ import type { Session } from '@supabase/supabase-js';
 import { formatPrice, type TramaProduct } from '../data/trama';
 import { createTramaClient } from '../lib/trama-supabase';
 import { mountCompanySettings } from './trama-admin-company';
+import { mountPurchaseSections } from './trama-admin-purchase';
+import { mountWholesaleSettings } from './trama-admin-wholesale';
 import { mountTramaAdminVariants } from './trama-admin-variants';
 
 type CatalogProduct = TramaProduct & { published: boolean };
@@ -99,6 +101,8 @@ export function mountTramaAdmin(root: HTMLElement, onCompanySaved: () => void) {
     submit.disabled = busy;
   });
   const company = mountCompanySettings(root, client, signal, onCompanySaved);
+  const purchaseSections = mountPurchaseSections(root, client, signal);
+  const wholesale = mountWholesaleSettings(root, client, signal);
 
   const images = client.storage.from(photoBucket);
 
@@ -235,6 +239,8 @@ export function mountTramaAdmin(root: HTMLElement, onCompanySaved: () => void) {
       setStatus(migrationStatus, '');
       resetEditor();
       company.reset();
+      purchaseSections.reset();
+      wholesale.reset();
       inventory.replaceChildren();
       setStatus(inventoryStatus, '');
     }
@@ -258,6 +264,8 @@ export function mountTramaAdmin(root: HTMLElement, onCompanySaved: () => void) {
       window.setTimeout(() => {
         if (signal.aborted || version !== sessionVersion) return;
         void company.load();
+        purchaseSections.load();
+        void wholesale.load();
         void loadProducts();
       }, 0);
     }

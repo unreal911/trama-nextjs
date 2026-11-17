@@ -67,7 +67,7 @@ body:has(#product-dialog[open]) { overflow: hidden; }
 .picker-summary > p:first-child > strong { color: var(--accent); }
 .picker-summary > p:first-child > span { color: var(--muted); font-size: 11px; }
 .picker-summary b { font-weight: 500; }
-.picker-tier-note { margin-top: 3px; color: var(--muted); font-size: 11px; line-height: 1.7; }
+.picker-quantity-note { margin-top: 3px; color: var(--muted); font-size: 11px; line-height: 1.7; }
 .picker-checkout { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-top: 13px; }
 .picker-checkout > div { display: flex; flex-direction: column; gap: 5px; }
 .picker-checkout > div > span { color: var(--muted); font-size: 10px; }

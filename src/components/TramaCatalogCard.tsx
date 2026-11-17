@@ -14,7 +14,7 @@ export default function TramaCatalogCard({ product, index }: Props) {
         <span className="product-index">T / {String(index + 1).padStart(2, '0')}</span>
       </button>
       <div className="product-topline"><span data-card-label>{product.label}</span><span data-card-colors>{product.colors.length} {product.colors.length === 1 ? 'COLOR' : 'COLORES'}</span></div>
-      <div className="product-title-row"><h3><button type="button" className="product-title-button" data-select-product={product.id}>{product.name}</button></h3><p><span data-card-price>S/ {product.price.toFixed(2)}</span><small>/ prenda · 6–23 und.</small></p></div>
+      <div className="product-title-row"><h3><button type="button" className="product-title-button" data-select-product={product.id}>{product.name}</button></h3><p><span data-card-price>S/ {product.price.toFixed(2)}</span><small>/ prenda</small></p></div>
       <p className="product-material">{product.material}</p>
       <p className="product-variant-note">Tallas {product.sizes.join(' · ')} · Cantidades a tu elección</p>
       <button className="add-product" type="button" data-select-product={product.id}>Elegir tallas y colores <span aria-hidden="true">+</span></button>

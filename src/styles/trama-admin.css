@@ -73,11 +73,43 @@
   margin-top: 24px;
 }
 
-.trama-admin-company {
+.trama-admin-company,
+.trama-admin-purchase {
   margin-bottom: 24px;
 }
 
-#trama-company-retry {
+.trama-admin-purchase > details {
+  margin-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.trama-admin-purchase summary {
+  padding: 14px 0 0;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.trama-admin-purchase form { margin-top: 16px; }
+.trama-admin-purchase-items { display: grid; gap: 12px; }
+
+.trama-admin fieldset.trama-admin-purchase-item {
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.trama-admin-purchase-item legend {
+  padding-inline: 4px;
+  font-size: .85rem;
+  font-weight: 700;
+}
+
+[data-purchase-add] { justify-self: start; }
+[data-purchase-retry] { margin-top: 12px; }
+
+#trama-company-retry,
+#trama-wholesale-retry {
   margin-top: 12px;
 }
 
@@ -121,7 +153,8 @@
 }
 
 .trama-admin input:not([type="checkbox"]),
-.trama-admin select {
+.trama-admin select,
+.trama-admin textarea {
   width: 100%;
   min-height: 44px;
   padding: 9px 11px;
@@ -132,6 +165,8 @@
   font-size: 1rem;
   font-weight: 500;
 }
+
+.trama-admin textarea { resize: vertical; }
 
 .trama-admin input::placeholder {
   color: var(--muted);

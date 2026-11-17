@@ -83,14 +83,6 @@ export const products: TramaProduct[] = [
   },
 ];
 
-export function getDiscountRate(totalQuantity: number): number {
-  return totalQuantity >= 48 ? 0.15 : totalQuantity >= 24 ? 0.1 : 0;
-}
-
-export function getUnitPrice(basePrice: number, totalQuantity: number): number {
-  return Math.round(basePrice * (1 - getDiscountRate(totalQuantity)) * 100) / 100;
-}
-
 const currency = new Intl.NumberFormat('es-PE', {
   style: 'currency',
   currency: 'PEN',

@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { AdminClient } from './admin-client';
+import { PurchaseSectionsEditor } from './purchase-sections';
+import { WholesaleEditor } from './wholesale-editor';
 import StoreBrand from '../../src/components/StoreBrand';
 import { MAX_COMPANY_NAME_LENGTH } from '../../src/data/brand';
 import { loadStoreSettings } from '../../src/lib/store-settings';
@@ -107,6 +109,8 @@ export default async function AdminPage() {
             <p className="trama-admin-status" id="trama-company-status" role="status" />
             <button className="trama-admin-button trama-admin-secondary" id="trama-company-retry" type="button" hidden>Volver a cargar los datos</button>
           </section>
+          <PurchaseSectionsEditor />
+          <WholesaleEditor />
           <div className="trama-admin-grid">
             <section className="trama-admin-card trama-admin-editor" aria-labelledby="trama-editor-title">
               <h2 id="trama-editor-title">Nuevo producto</h2>

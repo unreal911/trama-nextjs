@@ -19,18 +19,21 @@ test('mixes colors, sizes and models by unit and keeps the exact breakdown in th
   assert.match(text, /Pedido sujeto a confirmación/);
 });
 
-test('global price tiers apply to every model at both thresholds and recalculate when quantity decreases', () => {
-  const cases = [
-    { quantity: 23, subtotal: 576, total: 576, discount: 0 },
-    { quantity: 24, subtotal: 600, total: 540, discount: 60 },
-    { quantity: 47, subtotal: 1152, total: 1036.8, discount: 115.2 },
-    { quantity: 48, subtotal: 1176, total: 999.6, discount: 176.4 },
-    { quantity: 24, subtotal: 600, total: 540, discount: 60 },
-    { quantity: 23, subtotal: 576, total: 576, discount: 0 },
-  ];
-  for (const expected of cases) {
-    assert.deepEqual(summarizeOrder([polo(expected.quantity - 1), camisa(1)]), expected);
+test('orders use the catalog unit prices at every quantity', () => {
+  for (const quantity of [6, 23, 24, 38, 47, 48, 60]) {
+    const order = [polo(quantity - 1), camisa(1)];
+    assert.deepEqual(summarizeOrder(order), { quantity, total: (quantity - 1) * 24 + 48 });
+    const summary = buildOrderText(order);
+    assert.match(summary, /24\.00 c\/u/);
+    assert.doesNotMatch(summary, /descuento/i);
   }
+});
+
+test('the published minimum applies to the order and WhatsApp draft', () => {
+  const pricing = { minimum: 8 };
+  assert.throws(() => buildOrderText([polo(7)], undefined, undefined, pricing), /mínimo de 8/);
+  const url = new URL(buildOrderWhatsAppUrl([polo(8)], '51999999999', undefined, undefined, pricing));
+  assert.match(url.searchParams.get('text'), /Cantidad: 8 prendas/);
 });
 
 test('restores legacy packs and new unit quantities, merges duplicates and rejects corrupt saved variants', () => {
@@ -56,7 +59,7 @@ test('adds to existing variants atomically and rejects overflow or invalid quant
 });
 
 test('an empty or incomplete draft cannot be exported and non-multiple-of-six orders are accepted', () => {
-  assert.deepEqual(summarizeOrder([]), { quantity: 0, subtotal: 0, total: 0, discount: 0 });
+  assert.deepEqual(summarizeOrder([]), { quantity: 0, total: 0 });
   assert.throws(() => buildOrderText([]), /mínimo/);
   assert.throws(() => buildOrderText([polo(5)]), /mínimo/);
   assert.match(buildOrderText([polo(7)]), /Cantidad: 7 prendas/);
@@ -79,7 +82,7 @@ test('WhatsApp uses the provided recipient and preserves the complete 41-garment
   assert.match(text, /SOMOS MAYORISTAS · PEDIDO MAYORISTA/);
   assert.match(text, /30 × Pantalón relaxed \| Negro \| Talla 28/);
   assert.match(text, /Cantidad: 41 prendas/);
-  assert.ok(text.replaceAll('\u00a0', ' ').includes('Total referencial: S/ 1,900.80'));
+  assert.ok(text.replaceAll('\u00a0', ' ').includes('Total referencial: S/ 2,112.00'));
   assert.equal((text.match(/ × /g) || []).length, 5);
   assert.match(text, /Pedido sujeto a confirmación/);
 });
@@ -109,7 +112,7 @@ test('uses newly published products and their current prices throughout the orde
   const selection = { id: product.id, color: 'Ocre', size: 'M', qty: 6 };
   const order = addOrderSelection([], [selection], catalog);
   assert.deepEqual(validateOrder([polo(6), selection], catalog), order);
-  assert.deepEqual(summarizeOrder(order, catalog), { quantity: 6, subtotal: 171, total: 171, discount: 0 });
+  assert.deepEqual(summarizeOrder(order, catalog), { quantity: 6, total: 171 });
   const url = new URL(buildOrderWhatsAppUrl(order, '51999999999', catalog));
   assert.match(url.searchParams.get('text'), /6 × Polo nuevo \| Ocre \| Talla M/);
   catalog.delete(product.id);

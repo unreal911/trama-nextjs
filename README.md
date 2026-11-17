@@ -10,6 +10,10 @@ En Netlify, añade las variables públicas de Supabase en **Project configuratio
 
 Para editar el nombre y el WhatsApp desde **Administrar catálogo → Datos de la empresa**, ejecuta [somos_store_settings.sql](supabase/somos_store_settings.sql) en SQL Editor. El nombre y el número guardados aparecen en la tienda y sus pedidos al abrir o recargar la página.
 
+Para editar los pasos y las preguntas frecuentes de **Cómo comprar**, ejecuta [somos_purchase_sections.sql](supabase/somos_purchase_sections.sql) en SQL Editor. En **Administrar catálogo → Contenido de «Cómo comprar»** puedes guardar el texto y la visibilidad de cada sección. Las preguntas también se pueden añadir, quitar u ocultar individualmente.
+
+Para editar el encabezado de **Mayoristas**, el pedido mínimo y la sección de tallas y colores, ejecuta [somos_wholesale_settings.sql](supabase/somos_wholesale_settings.sql) en SQL Editor. Edita los campos en **Administrar catálogo → Mayoristas** y recarga la tienda para ver los cambios.
+
 ```powershell
 npm install
 npm run dev
@@ -28,6 +32,8 @@ En un proyecto Supabase nuevo, ejecuta estos archivos en orden:
 3. [trama_product_images.sql](supabase/trama_product_images.sql)
 4. [trama_product_color_images.sql](supabase/trama_product_color_images.sql)
 5. [somos_store_settings.sql](supabase/somos_store_settings.sql)
+6. [somos_purchase_sections.sql](supabase/somos_purchase_sections.sql)
+7. [somos_wholesale_settings.sql](supabase/somos_wholesale_settings.sql)
 
 Las cuentas administradoras usan el permiso `trama_admin`. Para crear una, confirma el correo del usuario en **Authentication → Users** y asigna el permiso en `app_metadata` desde SQL Editor con el UUID correspondiente:
 

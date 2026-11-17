@@ -1,6 +1,7 @@
-import { products, getDiscountRate, getUnitPrice, formatPrice } from '../data/trama.ts';
+import { products, formatPrice } from '../data/trama.ts';
 import type { TramaProduct } from '../data/trama.ts';
 import { STORE_NAME, isWhatsAppNumber } from '../data/brand.ts';
+import { defaultWholesalePricing, formatGarments, MAX_LINE_QUANTITY, MAX_ORDER_LINES } from '../data/wholesale.ts';
 
 export interface OrderLine {
   id: string;
@@ -9,9 +10,8 @@ export interface OrderLine {
   qty: number;
 }
 
-export const MIN_ORDER_QUANTITY = 6;
-export const MAX_LINE_QUANTITY = 600;
-export const MAX_ORDER_LINES = 100;
+export const MIN_ORDER_QUANTITY = defaultWholesalePricing.minimum;
+export { MAX_LINE_QUANTITY, MAX_ORDER_LINES };
 const localCatalog = new Map(products.map((product) => [product.id, product]));
 type Catalog = ReadonlyMap<string, TramaProduct>;
 
@@ -57,24 +57,22 @@ export function addOrderSelection(order: OrderLine[], selection: OrderLine[], ca
 
 export function summarizeOrder(order: OrderLine[], catalog: Catalog = localCatalog) {
   const quantity = order.reduce((sum, line) => sum + line.qty, 0);
-  const subtotalCents = order.reduce((sum, line) => sum + Math.round(catalog.get(line.id)!.price * 100) * line.qty, 0);
-  const totalCents = order.reduce((sum, line) => sum + Math.round(getUnitPrice(catalog.get(line.id)!.price, quantity) * 100) * line.qty, 0);
-  return { quantity, subtotal: subtotalCents / 100, total: totalCents / 100, discount: (subtotalCents - totalCents) / 100 };
+  const totalCents = order.reduce((sum, line) => sum + Math.round(catalog.get(line.id)!.price * 100) * line.qty, 0);
+  return { quantity, total: totalCents / 100 };
 }
 
-export function buildOrderText(order: OrderLine[], catalog: Catalog = localCatalog, companyName = STORE_NAME): string {
-  const { quantity, subtotal, total, discount } = summarizeOrder(order, catalog);
-  if (quantity < MIN_ORDER_QUANTITY) throw new Error(`Completa un mínimo de ${MIN_ORDER_QUANTITY} prendas para copiar tu pedido.`);
+export function buildOrderText(order: OrderLine[], catalog: Catalog = localCatalog, companyName = STORE_NAME, pricing = defaultWholesalePricing): string {
+  const { quantity, total } = summarizeOrder(order, catalog);
+  if (quantity < pricing.minimum) throw new Error(`Completa un mínimo de ${formatGarments(pricing.minimum)} para copiar tu pedido.`);
   const lines = order.map((line) => {
     const product = catalog.get(line.id)!;
-    const price = getUnitPrice(product.price, quantity);
+    const price = product.price;
     return `${line.qty} × ${product.name} | ${line.color} | Talla ${line.size} | ${formatPrice(price)} c/u | ${formatPrice(price * line.qty)}`;
   });
   return [
     'Hola, quiero estos productos:', '',
     `${companyName.toUpperCase()} · PEDIDO MAYORISTA`, '', ...lines, '',
-    `Cantidad: ${quantity} prendas`, `Subtotal: ${formatPrice(subtotal)}`,
-    `Descuento (${getDiscountRate(quantity) * 100}%): ${formatPrice(discount)}`,
+    `Cantidad: ${formatGarments(quantity)}`,
     `Total referencial: ${formatPrice(total)}`, '',
     'Pedido sujeto a confirmación de disponibilidad y entrega.',
   ].join('\n');
@@ -85,9 +83,10 @@ export function buildOrderWhatsAppUrl(
   number: string,
   catalog: Catalog = localCatalog,
   companyName = STORE_NAME,
+  pricing = defaultWholesalePricing,
 ): string {
   if (!isWhatsAppNumber(number)) throw new Error('Configura el WhatsApp de la tienda con código de país y solo dígitos.');
   const url = new URL(`https://wa.me/${number}`);
-  url.searchParams.set('text', buildOrderText(order, catalog, companyName));
+  url.searchParams.set('text', buildOrderText(order, catalog, companyName, pricing));
   return url.href;
 }

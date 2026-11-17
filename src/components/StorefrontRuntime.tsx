@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import type { StoreSettings } from '../data/brand';
+import type { WholesalePricing } from '../data/wholesale';
 import { initializeCampaignAttribution } from '../scripts/campaign-attribution';
 import { initializeTrama } from '../scripts/trama-mayorista';
 
@@ -12,7 +13,7 @@ const legacyRoutes = new Map([
   ['#preguntas', '/como-comprar#preguntas'],
 ]);
 
-export default function StorefrontRuntime({ settings }: { settings: StoreSettings }) {
+export default function StorefrontRuntime({ settings, pricing }: { settings: StoreSettings; pricing: WholesalePricing }) {
   useEffect(() => {
     const legacyDestination = window.location.pathname === '/' ? legacyRoutes.get(window.location.hash) : undefined;
     if (legacyDestination) {
@@ -24,9 +25,9 @@ export default function StorefrontRuntime({ settings }: { settings: StoreSetting
 
     const controller = new AbortController();
     initializeCampaignAttribution(controller.signal, settings.whatsappNumber);
-    initializeTrama(controller.signal, settings);
+    initializeTrama(controller.signal, settings, pricing);
     return () => controller.abort();
-  }, [settings]);
+  }, [settings, pricing]);
 
   return null;
 }
