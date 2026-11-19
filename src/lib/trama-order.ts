@@ -10,6 +10,42 @@ export interface OrderLine {
   qty: number;
 }
 
+export type OrderView = 'color' | 'size';
+
+export function groupSelectionLines(lines: OrderLine[], view: OrderView) {
+  const groups = new Map<string, { label: string; quantity: number; lines: { line: OrderLine; index: number }[] }>();
+  lines.forEach((line, index) => {
+    const label = view === 'size' ? line.size : line.color;
+    const group = groups.get(label) || { label, quantity: 0, lines: [] };
+    group.quantity += line.qty;
+    group.lines.push({ line, index });
+    groups.set(label, group);
+  });
+  return [...groups.values()];
+}
+
+// Preserve source indexes so editing a grouped row still targets the exact variant.
+export function groupOrderLines(order: OrderLine[]) {
+  type ColorGroup = { color: string; quantity: number; lines: { line: OrderLine; index: number }[] };
+  const models = new Map<string, { id: string; quantity: number; colors: Map<string, ColorGroup> }>();
+  order.forEach((line, index) => {
+    let model = models.get(line.id);
+    if (!model) {
+      model = { id: line.id, quantity: 0, colors: new Map() };
+      models.set(line.id, model);
+    }
+    let color = model.colors.get(line.color);
+    if (!color) {
+      color = { color: line.color, quantity: 0, lines: [] };
+      model.colors.set(line.color, color);
+    }
+    color.lines.push({ line, index });
+    color.quantity += line.qty;
+    model.quantity += line.qty;
+  });
+  return [...models.values()].map((model) => ({ ...model, colors: [...model.colors.values()] }));
+}
+
 export const MIN_ORDER_QUANTITY = defaultWholesalePricing.minimum;
 export { MAX_LINE_QUANTITY, MAX_ORDER_LINES };
 const localCatalog = new Map(products.map((product) => [product.id, product]));
@@ -53,6 +89,19 @@ export function addOrderSelection(order: OrderLine[], selection: OrderLine[], ca
     }
   }
   return next;
+}
+
+export function replaceProductSelection(order: OrderLine[], productId: string, selection: OrderLine[], catalog: Catalog = localCatalog): OrderLine[] {
+  if (!catalog.has(productId) || selection.some((line) => line.id !== productId)) {
+    throw new Error('La selección debe corresponder a la prenda que estás editando.');
+  }
+  const otherProducts = order.filter((line) => line.id !== productId);
+  const next = selection.length ? addOrderSelection(otherProducts, selection, catalog) : otherProducts.map((line) => ({ ...line }));
+  const replacement = next.filter((line) => line.id === productId);
+  const unchanged = next.filter((line) => line.id !== productId);
+  const originalIndex = order.findIndex((line) => line.id === productId);
+  unchanged.splice(originalIndex < 0 ? unchanged.length : originalIndex, 0, ...replacement);
+  return unchanged;
 }
 
 export function summarizeOrder(order: OrderLine[], catalog: Catalog = localCatalog) {

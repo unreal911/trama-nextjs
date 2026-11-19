@@ -12,23 +12,25 @@ export default function TramaProductPicker() {
           <header className="picker-heading">
             <p className="eyebrow" id="product-picker-label">LA COLECCIÓN</p>
             <h2 id="product-picker-title">Elige tus cantidades.</h2>
-            <p id="product-picker-material"></p>
+            <button type="button" id="product-picker-cover" className="picker-cover-preview" data-preview-product=""><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6M7 10h6m-3-3v6"/></svg>Ver foto del catálogo</button>
           </header>
 
           <section className="picker-options" aria-labelledby="picker-colors-heading">
-            <h3 id="picker-colors-heading"><span>01</span> Elige un color <b id="product-picker-selected-color" className="picker-active-color" /></h3>
+            <div className="order-view-switch picker-entry-switch" role="group" aria-label="Elegir cantidades por color o talla"><button type="button" data-picker-entry-view="color" aria-pressed="true">Por color</button><button type="button" data-picker-entry-view="size" aria-pressed="false">Por talla</button></div>
+            <h3 id="picker-colors-heading"><span>01</span> <b id="product-picker-axis-instruction">Elige un color</b></h3>
+            <p className="picker-current-color"><span id="product-picker-axis-label">Color activo: </span><b id="product-picker-selected-color" /></p>
             <div id="product-picker-colors" className="picker-colors" role="group" aria-labelledby="picker-colors-heading"></div>
+            <div id="product-picker-size-options" className="picker-size-options" role="group" aria-labelledby="picker-colors-heading" hidden></div>
           </section>
 
-          <section className="picker-options" aria-labelledby="picker-sizes-heading">
-            <h3 id="picker-sizes-heading"><span>02</span> Cantidades en <b id="product-picker-current-color"></b></h3>
-            <p className="picker-option-note">Indica cuántas prendas necesitas de cada talla. Puedes cambiar de color y seguir sumando.</p>
-            <div className="picker-size-head" aria-hidden="true"><span>Talla</span><span>Cantidad</span><span>Precio c/u</span></div>
+          <section className="picker-options" aria-label="Cantidades por talla y color">
+            <div id="product-picker-size-head" className="picker-size-head" aria-hidden="true"><span id="product-picker-row-heading">Talla</span><span>Cantidad</span><span>Precio c/u</span></div>
             <div id="product-picker-sizes" className="picker-sizes"></div>
           </section>
 
           <section className="picker-selection" aria-labelledby="picker-selection-heading">
             <div className="picker-selection-heading"><h3 id="picker-selection-heading">Tu selección de esta prenda</h3><button type="button" id="product-picker-clear">Limpiar</button></div>
+            <div className="order-view-switch" role="group" aria-label="Agrupar selección de esta prenda"><button type="button" data-picker-view="color" aria-pressed="true">Por color</button><button type="button" data-picker-view="size" aria-pressed="false">Por talla</button></div>
             <div id="product-picker-selected" className="picker-selected"></div>
           </section>
         </div>

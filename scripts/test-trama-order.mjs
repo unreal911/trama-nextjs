@@ -1,9 +1,54 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { validateOrder, addOrderSelection, summarizeOrder, buildOrderText, buildOrderWhatsAppUrl } from '../src/lib/trama-order.ts';
+import { validateOrder, addOrderSelection, replaceProductSelection, summarizeOrder, groupOrderLines, buildOrderText, buildOrderWhatsAppUrl } from '../src/lib/trama-order.ts';
 
 const polo = (qty, color = 'Crudo', size = 'M') => ({ id: 'polo-esencial', color, size, qty });
 const camisa = (qty) => ({ id: 'camisa-lino', color: 'Arena', size: 'L', qty });
+
+test('saving a reopened product replaces its quantities without adding them twice or changing other models', () => {
+  const order = [polo(3), camisa(2), polo(5, 'Negro', 'L')];
+  const snapshot = structuredClone(order);
+  const selection = [polo(4), polo(5, 'Negro', 'L'), polo(2, 'Crudo', 'L')];
+  const next = replaceProductSelection(order, 'polo-esencial', selection);
+  assert.deepEqual(next, [...selection, camisa(2)]);
+  assert.equal(summarizeOrder(next).quantity, 13);
+  assert.deepEqual(replaceProductSelection(next, 'polo-esencial', selection), next);
+  assert.deepEqual(order, snapshot);
+  next[0].qty = 10;
+  assert.equal(selection[0].qty, 4);
+  assert.equal(order[0].qty, 3);
+});
+
+test('editing can remove a color or the complete product while preserving other products', () => {
+  const order = [camisa(2), polo(3), polo(5, 'Negro', 'L')];
+  assert.deepEqual(replaceProductSelection(order, 'polo-esencial', [polo(1)]), [camisa(2), polo(1)]);
+  assert.deepEqual(replaceProductSelection(order, 'polo-esencial', []), [camisa(2)]);
+  assert.deepEqual(replaceProductSelection([polo(3)], 'polo-esencial', []), []);
+});
+
+test('replacement enforces the final variant limit and rejects invalid edits atomically', () => {
+  const order = [polo(600), camisa(2)];
+  assert.deepEqual(replaceProductSelection(order, 'polo-esencial', [polo(600)]), order);
+  for (const selection of [[polo(601)], [polo(-1)], [polo(1.5)], [polo(2, 'Inventado')], [camisa(3)]]) {
+    assert.throws(() => replaceProductSelection(order, 'polo-esencial', selection));
+  }
+  assert.deepEqual(order, [polo(600), camisa(2)]);
+});
+
+test('groups nonadjacent sizes by model and color while retaining the editable source indexes', () => {
+  const order = [polo(2), camisa(3), polo(4, 'Negro'), polo(5, 'Crudo', 'L'), polo(1, 'Arena')];
+  const snapshot = structuredClone(order);
+  const grouped = groupOrderLines(order);
+  assert.equal(grouped.length, 2);
+  assert.equal(grouped[0].quantity, 12);
+  assert.deepEqual(grouped[0].colors.map(({ color, quantity, lines }) => [color, quantity, lines.map(({ index }) => index)]), [
+    ['Crudo', 7, [0, 3]], ['Negro', 4, [2]], ['Arena', 1, [4]],
+  ]);
+  assert.equal(grouped[1].quantity, 3);
+  assert.deepEqual(grouped[1].colors[0].lines.map(({ index }) => index), [1]);
+  assert.deepEqual(order, snapshot);
+  assert.deepEqual(groupOrderLines([]), []);
+});
 
 test('mixes colors, sizes and models by unit and keeps the exact breakdown in the export', () => {
   let order = addOrderSelection([], [polo(2), polo(1, 'Crudo', 'L'), polo(2, 'Negro', 'S')]);

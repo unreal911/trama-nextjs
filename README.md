@@ -2,6 +2,26 @@
 
 Tienda en Next.js con catálogo, pedido mayorista y panel de productos. Usa Supabase para el catálogo, las imágenes y la autenticación.
 
+## Pedidos de compradores
+
+Ejecuta [somos_orders.sql](supabase/somos_orders.sql) en el SQL Editor de tu proyecto Supabase después de las migraciones del catálogo y mayoristas. El archivo es repetible y conserva los pedidos existentes.
+
+El comprador completa dos pasos en «Mi pedido»: primero revisa las prendas por **color** o **talla**, y después pulsa **Continuar a mis datos** para introducir nombre y WhatsApp y confirmar **Enviar pedido**. El total y la acción principal permanecen visibles. Puede **Seguir eligiendo prendas** o **Volver al resumen** sin perder cantidades ni los datos escritos durante esa visita. Si falla el envío, conserva el formulario y puede reintentar. Solo después de registrarse recibe un código `SM-000001` y se vacía su selección. Puede abrir WhatsApp para consultar por ese código. Copiar el resumen o guardar cantidades en el carrito no crea un pedido.
+
+En `/admin`, la sección **Pedidos de clientes** muestra los pedidos, sus importes y los estados **Nuevo**, **Confirmado**, **En preparación**, **Completado** y **Cancelado**. Admite búsqueda por nombre, WhatsApp o código, filtros, paginación y actualización cada 30 segundos mientras la página está visible. El detalle permite agrupar cada modelo por color o talla y contactar al comprador. El catálogo y los ajustes siguen en **Catálogo y configuración**.
+
+Los precios, nombres e imágenes se guardan como una copia del catálogo al enviar: cambios posteriores en el catálogo no alteran los pedidos recibidos. Los reintentos del mismo envío recuperan el mismo comprobante. La tabla solo se puede leer con una cuenta `trama_admin`; la recepción pública valida las variantes y calcula importes en la base de datos. No requiere una clave `service_role`.
+
+## Disponibilidad y proformas
+
+Ejecuta [somos_order_availability.sql](supabase/somos_order_availability.sql) después de `somos_orders.sql`. Añade la revisión de disponibilidad y los enlaces temporales sin borrar los pedidos existentes.
+
+En **Pedidos de clientes → Ver pedido**, cada variante muestra el círculo de su color. Puedes ajustar la cantidad disponible o marcar **No disponible**. Estos cambios corresponden a ese pedido y conservan lo solicitado originalmente; no modifican el inventario del catálogo. Pulsa **Guardar revisión** antes de **Exportar PDF** o **Crear proforma temporal**.
+
+La proforma comparte una copia fija de la revisión, con mensaje, productos, colores, tallas, cantidades solicitadas y disponibles e importe actualizado. El cliente abre `/proforma/[token]` sin cuenta, puede agrupar por color o talla y descargar el PDF. Cada enlace vence a los 7 días y puede desactivarse desde el detalle. Una revisión posterior requiere crear otra versión; las versiones anteriores conservan sus cantidades. No se publican el WhatsApp del comprador ni sus notas privadas. El enlace funciona como acceso a esa proforma: compártelo únicamente con el destinatario.
+
+Para enviar enlaces a clientes fuera de tu equipo, despliega esta actualización en el dominio de la tienda y crea las proformas desde ese dominio. Los enlaces generados en `localhost` solo sirven para pruebas locales.
+
 ## Inicio local
 
 Requiere Node.js 22.18 o posterior. Crea un archivo `.env.local` en la raíz del proyecto con `NEXT_PUBLIC_TRAMA_SUPABASE_URL` y `NEXT_PUBLIC_TRAMA_SUPABASE_ANON_KEY`. Usa la URL y la clave pública del proyecto de Supabase existente.
@@ -34,6 +54,8 @@ En un proyecto Supabase nuevo, ejecuta estos archivos en orden:
 5. [somos_store_settings.sql](supabase/somos_store_settings.sql)
 6. [somos_purchase_sections.sql](supabase/somos_purchase_sections.sql)
 7. [somos_wholesale_settings.sql](supabase/somos_wholesale_settings.sql)
+8. [somos_orders.sql](supabase/somos_orders.sql)
+9. [somos_order_availability.sql](supabase/somos_order_availability.sql)
 
 Las cuentas administradoras usan el permiso `trama_admin`. Para crear una, confirma el correo del usuario en **Authentication → Users** y asigna el permiso en `app_metadata` desde SQL Editor con el UUID correspondiente:
 

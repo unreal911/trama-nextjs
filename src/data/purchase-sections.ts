@@ -41,7 +41,7 @@ export const defaultPurchaseSections: Record<PurchaseSectionId, PurchaseSection>
       items: [
         { title: 'Elige las prendas', body: 'Explora la colección y abre el modelo que quieres agregar.' },
         { title: 'Combina colores y tallas', body: 'Elige un color e indica cuántas unidades quieres de cada talla. Puedes cambiar de color y seguir combinando antes de añadir la selección.' },
-        { title: 'Revisa y comparte', body: 'Abre «Mi pedido», comprueba las cantidades y pulsa «Copiar resumen». Si aparece la opción de WhatsApp, puedes abrir el chat y enviar el mensaje preparado.' },
+        { title: 'Revisa y envía', body: 'Abre «Mi pedido» y revisa tu selección por color o talla. Pulsa «Continuar a mis datos», completa tu nombre y WhatsApp y confirma «Enviar pedido». Recibirás un código para coordinar con la tienda.' },
       ],
     },
   },
@@ -53,8 +53,8 @@ export const defaultPurchaseSections: Record<PurchaseSectionId, PurchaseSection>
       items: [
         { title: '¿Cuál es el pedido mínimo?', body: 'El mínimo es de {pedidoMinimo} en el pedido completo. Puedes repartir el pedido entre modelos, colores y tallas y ajustar cada variante por unidad. Una selección menor se guarda como borrador; alcanza el mínimo para copiar el resumen o prepararlo en WhatsApp.' },
         { title: '¿Puedo combinar tallas y colores?', body: 'Sí. Abre una prenda y elige un color para ver sus tallas. Indica las cantidades y cambia de color para añadir otras combinaciones: las que ya elegiste se conservan mientras preparas la selección. Por ejemplo, puedes combinar 2 polos crudos en M, 1 crudo en L y 3 negros en S. Pulsa el botón de añadir cuando termines.' },
-        { title: '¿Cómo comparto mi selección?', body: 'Con al menos {pedidoMinimo}, pulsa «Copiar resumen» en «Mi pedido». El resumen incluye modelos, colores, tallas, cantidades y total. Si aparece «Copiar y enviar por WhatsApp», abre el chat, revisa el mensaje y pulsa «Enviar».\n\nSi tu navegador bloquea la copia automática, podrás seleccionar el resumen y copiarlo manualmente.' },
-        { title: '¿Cómo confirmo mi pedido?', body: 'Comparte el resumen con {empresa} para confirmar disponibilidad, precio final y condiciones de entrega. La confirmación y el pago se coordinan con la tienda.' },
+        { title: '¿Cómo comparto mi selección?', body: 'Con al menos {pedidoMinimo}, abre «Mi pedido» y pulsa «Continuar a mis datos». Completa tu nombre y WhatsApp y confirma «Enviar pedido». La tienda recibirá el detalle y verás un código de pedido. También puedes copiar el resumen para conservarlo.' },
+        { title: '¿Cómo confirmo mi pedido?', body: 'Después de enviar el pedido, {empresa} te contactará por WhatsApp para confirmar disponibilidad, precio final y condiciones de entrega. Si aparece «Consultar por WhatsApp», puedes abrir el chat indicando tu código de pedido. El pago se coordina con la tienda.' },
       ],
     },
   },

@@ -22,7 +22,7 @@ export const wholesaleTextGroups = [
     { name: 'variantsTitle', label: 'Título', value: 'Combina' },
     { name: 'variantsAccent', label: 'Texto final del título', value: 'tallas y colores', optional: true },
     { name: 'variantsBody', label: 'Descripción', value: 'Elige un modelo, selecciona un color e indica las cantidades por talla. Puedes añadir distintas combinaciones al mismo pedido.', multiline: true },
-    { name: 'variantsNote', label: 'Indicaciones del pedido', value: 'Revisa las cantidades y el total en «Mi pedido» y pulsa «Copiar resumen». Si está disponible «Copiar y enviar por WhatsApp», puedes abrir el chat con el pedido listo para enviar.', multiline: true, optional: true },
+    { name: 'variantsNote', label: 'Indicaciones del pedido', value: 'Revisa tu selección por color o talla en «Mi pedido». Pulsa «Continuar a mis datos», completa tu nombre y WhatsApp y confirma «Enviar pedido». La tienda recibirá tu selección y coordinará contigo.', multiline: true, optional: true },
     { name: 'variantsLink', label: 'Texto del botón al catálogo', value: 'Explorar la colección' },
   ] },
 ] as const satisfies readonly { title: string; visibility: 'show_intro' | 'show_variants'; fields: readonly {

@@ -1,0 +1,60 @@
+.proforma-page { min-height: 100vh; background: var(--intro-surface); }
+.proforma-brand { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 24px max(20px, calc((100vw - 880px) / 2)); background: var(--brand); color: var(--on-brand); }
+.proforma-brand > strong { min-width: 0; font-size: 21px; overflow-wrap: anywhere; }
+.proforma-brand > span { flex: none; padding: 6px 10px; border-radius: 20px; border: 1px solid var(--on-brand-line); font-size: 13px; }
+.proforma-main { width: min(880px, calc(100% - 40px)); margin: auto; padding: 40px 0; }
+.proforma-intro h1 { font: 750 clamp(32px, 6vw, 48px)/1.15 Manrope, sans-serif; letter-spacing: -.055em; }
+.proforma-reference { margin-top: 16px; font-weight: 700; }
+.proforma-intro > p:not(.seller-eyebrow) { margin-top: 12px; line-height: 1.7; font-size: 16px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.proforma-intro .proforma-expiry { color: var(--muted); font-size: 14px; }
+.proforma-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 28px; }
+.proforma-summary > div { display: grid; gap: 12px; padding: 22px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.proforma-summary span { font-size: 14px; color: var(--muted); }
+.proforma-summary strong { font-size: 24px; overflow-wrap: anywhere; }
+.proforma-tools { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin: 28px 0 20px; }
+.proforma-tools .order-view-switch { margin: 0; }
+.proforma-tools > button { font-size: 15px; min-height: 50px; }
+.proforma-feedback { color: var(--error); font-size: 15px; }
+.proforma-feedback:empty { display: none; }
+.proforma-product { margin-top: 20px; padding: 24px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.proforma-product > header { display: flex; align-items: center; gap: 16px; }
+.proforma-product > header img { width: 64px; height: 80px; border-radius: 6px; background: var(--soft); }
+.proforma-product h2 { font-size: 23px; line-height: 1.4; overflow-wrap: anywhere; }
+.proforma-product header p { color: var(--muted); font-size: 15px; margin-top: 6px; }
+.proforma-group { margin-top: 24px; }
+.proforma-group h3 { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 18px; }
+.proforma-row { display: grid; grid-template-columns: minmax(0, 1fr) 90px 90px 110px; align-items: center; gap: 12px; padding: 16px 8px; border-bottom: 1px solid var(--line); font-size: 16px; }
+.proforma-row > :not(:first-child) { text-align: right; }
+.proforma-row-head { padding-block: 10px; color: var(--muted); background: var(--soft); font-size: 12px; }
+.proforma-label-short { display: none; text-decoration: none; }
+.proforma-variant-name { display: flex; align-items: center; gap: 8px; min-width: 0; overflow-wrap: anywhere; }
+.proforma-variant-name small { display: block; margin-top: 4px; color: var(--error); font-size: 12px; }
+.proforma-row.is-unavailable { color: var(--muted); }
+.proforma-final { margin-top: 24px; padding: 24px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.proforma-final > div { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; font-size: 16px; }
+.proforma-final strong { font-size: 30px; }
+.proforma-final p { margin: 16px 0; color: var(--muted); font-size: 15px; line-height: 1.7; }
+.proforma-final a { min-height: 50px; font-size: 15px; }
+.proforma-footer { padding: 24px 0 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.proforma-unavailable { max-width: 540px; margin: 18vh auto 40px; padding: 24px; text-align: center; }
+.proforma-unavailable h1 { font-size: 30px; line-height: 1.3; }
+.proforma-unavailable p { margin: 16px 0; color: var(--muted); line-height: 1.7; }
+.proforma-unavailable .trama-button { font-size: 16px; }
+@media (max-width: 600px) {
+  .proforma-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .proforma-summary > div { padding: 16px; }
+  .proforma-summary > div:last-child { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; }
+  .proforma-product { padding: 16px; }
+  .proforma-product h2 { font-size: 19px; }
+  .proforma-row { grid-template-columns: minmax(0, 1fr) 54px 54px 76px; gap: 6px; padding-inline: 0; font-size: 14px; }
+  .proforma-row-head { font-size: 11px; }
+  .proforma-label-long { display: none; }
+  .proforma-label-short { display: inline; }
+  .proforma-main { width: calc(100% - 28px); padding-top: 28px; }
+  .proforma-final { padding: 20px; }
+}
+@media (max-width: 360px) {
+  .proforma-row { grid-template-columns: minmax(0, 1fr) 40px 40px 68px; gap: 4px; font-size: 14px; }
+  .proforma-row-head { font-size: 11px; }
+  .proforma-summary > div:last-child { flex-wrap: wrap; }
+}

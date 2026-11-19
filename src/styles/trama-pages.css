@@ -132,7 +132,7 @@
 }
 
 @media (max-width: 800px) {
-  .trama-nav { gap: 10px; font-size: 13px; }
+  .trama-nav { gap: 10px; font-size: 16px; }
   .trama-nav a { padding-block: 12px; }
   .trama-nav a[aria-current='page'] { border-color: transparent; }
   .trama-category-grid { gap: 18px; }
@@ -144,11 +144,11 @@
   .trama-theme-toggle { width: 40px; height: 40px; }
   .header-actions .order-trigger > span { display: none; }
   .trama-page-intro { padding-top: 24px; padding-bottom: 35px; }
-  .trama-breadcrumbs { margin-bottom: 31px; font-size: 10px; gap: 9px; }
+  .trama-breadcrumbs { margin-bottom: 31px; font-size: 13px; gap: 9px; }
   .trama-page-intro h1 { font-size: 43px; }
   .trama-page-intro > p:not(.eyebrow) { font-size: 12px; margin-top: 20px; }
   [data-trama-page='coleccion'] .trama-breadcrumbs { margin-bottom: 20px; }
-  [data-trama-page='coleccion'] .trama-page-intro > p:not(.eyebrow) { font-size: 13px; }
+  [data-trama-page='coleccion'] .trama-page-intro > p:not(.eyebrow) { font-size: 16px; }
   .trama-category-grid { grid-template-columns: 1fr; gap: 30px; }
   .trama-category-image { aspect-ratio: 5/4; }
   .trama-category-image img { object-position: center 40%; }

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { AdminClient } from './admin-client';
+import { AdminClient, AdminSections } from './admin-client';
+import { OrdersDashboard } from './orders-dashboard';
 import { PurchaseSectionsEditor } from './purchase-sections';
 import { WholesaleEditor } from './wholesale-editor';
 import StoreBrand from '../../src/components/StoreBrand';
@@ -8,10 +9,11 @@ import { loadStoreSettings } from '../../src/lib/store-settings';
 import '../../src/styles/fonts.css';
 import '../../src/styles/demo-trama.css';
 import '../../src/styles/trama-admin.css';
+import '../../src/styles/trama-orders.css';
 
 export const metadata: Metadata = {
-  title: 'Administrar catálogo',
-  description: 'Panel de administración del catálogo y los datos de la empresa.',
+  title: 'Administración',
+  description: 'Pedidos de clientes, catálogo y datos de la empresa.',
   robots: { index: false, follow: false },
 };
 
@@ -70,7 +72,7 @@ export default async function AdminPage() {
       </header>
       <main className="trama-admin-main">
         <section className="trama-admin-card trama-admin-auth" id="trama-admin-auth" aria-labelledby="trama-admin-auth-title">
-          <h1 id="trama-admin-auth-title">Administrar catálogo</h1>
+          <h1 id="trama-admin-auth-title">Administración</h1>
           <form id="trama-admin-login" method="post">
             <fieldset disabled>
               <label>Correo electrónico <input name="email" type="email" autoComplete="username" required /></label>
@@ -85,9 +87,10 @@ export default async function AdminPage() {
 
         <section id="trama-admin-panel" aria-labelledby="trama-admin-title" hidden>
           <div className="trama-admin-intro">
-            <div><h1 id="trama-admin-title" tabIndex={-1}>Catálogo de productos</h1><p id="trama-admin-account" /></div>
+            <div><h1 id="trama-admin-title" tabIndex={-1}>Tu tienda, al día</h1><p id="trama-admin-account" /></div>
             <button className="trama-admin-button trama-admin-secondary" type="button" data-trama-signout>Cerrar sesión</button>
           </div>
+          <AdminSections orders={<OrdersDashboard companyName={companyName} />}>
           <section className="trama-admin-card trama-admin-company" aria-labelledby="trama-company-title">
             <h2 id="trama-company-title">Datos de la empresa</h2>
             <form id="trama-company-form" method="post">
@@ -177,6 +180,7 @@ export default async function AdminPage() {
               <template id="trama-inventory-row" dangerouslySetInnerHTML={{ __html: inventoryRow }} />
             </section>
           </div>
+          </AdminSections>
         </section>
       </main>
     </AdminClient>
