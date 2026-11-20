@@ -4,6 +4,8 @@ Tienda en Next.js con catálogo, pedido mayorista y panel de productos. Usa Supa
 
 ## Pedidos de compradores
 
+El selector de prendas mantiene cantidad, subtotal, **Ver selección** y **Añadir al pedido** en una barra inferior siempre visible, también en celular. El resumen agrupa por talla, en el orden del catálogo, y muestra sus colores, cantidades e importe; **Editar** vuelve a esa talla sin borrar las otras cantidades. Al añadir o guardar cambios se abre **Mi pedido** para revisarlo o seguir eligiendo. Un acceso flotante con cantidad y total permite volver al pedido desde el catálogo. Reabrir una prenda conserva la selección y **Guardar cambios** reemplaza sus cantidades sin duplicarlas.
+
 Ejecuta [somos_orders.sql](supabase/somos_orders.sql) en el SQL Editor de tu proyecto Supabase después de las migraciones del catálogo y mayoristas. El archivo es repetible y conserva los pedidos existentes.
 
 El comprador completa dos pasos en «Mi pedido»: primero revisa las prendas por **color** o **talla**, y después pulsa **Continuar a mis datos** para introducir nombre y WhatsApp y confirmar **Enviar pedido**. El total y la acción principal permanecen visibles. Puede **Seguir eligiendo prendas** o **Volver al resumen** sin perder cantidades ni los datos escritos durante esa visita. Si falla el envío, conserva el formulario y puede reintentar. Solo después de registrarse recibe un código `SM-000001` y se vacía su selección. Puede abrir WhatsApp para consultar por ese código. Copiar el resumen o guardar cantidades en el carrito no crea un pedido.

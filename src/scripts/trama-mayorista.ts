@@ -175,7 +175,6 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
   const toast = document.querySelector<HTMLElement>('#trama-toast');
   let order = validateOrder(savedOrder, productById);
   let orderView: OrderView = 'color';
-  let pickerView: OrderView = 'color';
   let submittingOrder = false;
   let checkoutStep: 'review' | 'details' | 'receipt' = 'review';
   let submissionAttempt: { signature: string; key: string } | null = null;
@@ -261,6 +260,10 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
     const { quantity, total } = totals();
     const countElements = new Set(document.querySelectorAll<HTMLElement>('[data-order-count], #order-count'));
     countElements.forEach((element) => { element.textContent = String(quantity); });
+    const floatingOrder = document.getElementById('floating-order');
+    if (floatingOrder) floatingOrder.hidden = quantity === 0;
+    document.querySelectorAll<HTMLElement>('[data-floating-order-count]').forEach((element) => { element.textContent = formatGarments(quantity); });
+    document.querySelectorAll<HTMLElement>('[data-floating-order-total]').forEach((element) => { element.textContent = formatPrice(total); });
     document.querySelectorAll<HTMLButtonElement>('[data-open-order]').forEach((button) => {
       button.setAttribute('aria-label', `Ver pedido, ${quantity} ${quantity === 1 ? 'prenda' : 'prendas'}`);
     });
@@ -373,6 +376,9 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
   const pickerSelected = document.querySelector<HTMLElement>('#product-picker-selected');
   const pickerAdd = document.querySelector<HTMLButtonElement>('#product-picker-add');
   const pickerClear = document.querySelector<HTMLButtonElement>('#product-picker-clear');
+  const pickerReview = document.querySelector<HTMLButtonElement>('#product-picker-review');
+  const pickerBody = document.getElementById('product-picker-body');
+  const pickerSelection = document.getElementById('product-picker-selection');
   const pickerFeedback = document.querySelector<HTMLElement>('#product-picker-feedback');
   const pickerImage = document.querySelector<HTMLImageElement>('#product-picker-image');
   const pickerCaption = document.getElementById('product-picker-photo-caption');
@@ -387,6 +393,23 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
     if (element) element.textContent = value;
   };
   const draftQuantity = (size: string, color = selectedColor) => draft.find((line) => line.color === color && line.size === size)?.qty || 0;
+  const syncPickerViewport = () => {
+    if (!picker) return;
+    const viewport = window.visualViewport;
+    const height = viewport?.height || window.innerHeight;
+    const top = viewport?.offsetTop || 0;
+    picker.style.setProperty('--picker-viewport-height', `${height}px`);
+    picker.style.setProperty('--picker-visual-top', `${top}px`);
+    picker.style.setProperty('--picker-visual-bottom', `${Math.max(0, window.innerHeight - height - top)}px`);
+  };
+  const resizePicker = () => { if (picker?.open) syncPickerViewport(); };
+  window.visualViewport?.addEventListener('resize', resizePicker, { passive: true, signal });
+  window.visualViewport?.addEventListener('scroll', resizePicker, { passive: true, signal });
+  window.addEventListener('resize', resizePicker, { passive: true, signal });
+  pickerReview?.addEventListener('click', () => {
+    pickerSelection?.focus({ preventScroll: true });
+    pickerSelection?.scrollIntoView({ block: 'start' });
+  }, { signal });
 
   const updatePicker = () => {
     if (!selectedProduct) return;
@@ -396,12 +419,17 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
     const changed = savedSelection.length !== draft.length || draft.some((line) => !savedSelection.some((saved) => saved.color === line.color && saved.size === line.size && saved.qty === line.qty));
     const combinedQuantity = order.filter((line) => line.id !== selectedProduct!.id).reduce((sum, line) => sum + line.qty, quantity);
     const unitPrice = selectedProduct.price;
-    pickerText('product-picker-quantity', String(quantity));
-    pickerText('product-picker-unit-price', formatPrice(unitPrice));
+    pickerText('product-picker-quantity', formatGarments(quantity));
+    pickerText('product-picker-unit-price', `${formatPrice(unitPrice)} c/u`);
+    const sizeCount = new Set(draft.map((line) => line.size)).size;
+    pickerText('product-picker-selection-count', quantity
+      ? `${formatGarments(quantity)} en ${sizeCount} ${sizeCount === 1 ? 'talla' : 'tallas'}. Revisa los colores y cantidades.`
+      : 'Elige tus cantidades para ver el detalle aquí.');
     pickerText('product-picker-total', formatPrice(Math.round(unitPrice * 100) * quantity / 100));
     const combinedNote = `Con esta selección tendrás ${formatGarments(combinedQuantity)} en tu pedido.`;
+    const missing = minimum - combinedQuantity;
     pickerText('product-picker-quantity-note', combinedQuantity < minimum
-      ? `${combinedNote} Faltan ${minimum - combinedQuantity} para el mínimo de ${minimum}. Puedes añadir otros modelos.`
+      ? `${combinedNote} ${missing === 1 ? 'Falta' : 'Faltan'} ${formatGarments(missing)} para el mínimo. Puedes añadir otros modelos.`
       : combinedNote);
     pickerColors?.querySelectorAll<HTMLButtonElement>('[data-picker-color]').forEach((button) => {
       const color = button.dataset.pickerColor!;
@@ -433,28 +461,38 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
       if (price) price.textContent = `${formatPrice(unitPrice)}${pickerEntryView === 'size' ? ' c/u' : ''}`;
     });
     if (pickerSelected) {
-      const lines = groupSelectionLines(draft, pickerView).map((group) => {
-        const block = createElement('div', 'picker-selected-group');
-        const heading = createElement('p', 'picker-selected-line');
-        heading.append(createElement('strong', '', pickerView === 'size' ? `Talla ${group.label}` : group.label), createElement('strong', '', formatGarments(group.quantity)));
+      const groups = groupSelectionLines(draft, 'size').sort((a, b) => selectedProduct!.sizes.indexOf(a.label) - selectedProduct!.sizes.indexOf(b.label));
+      const lines = groups.map((group) => {
+        const block = createElement('div', 'picker-selection-card');
+        const heading = createElement('div', 'picker-selection-heading');
+        const edit = createElement('button', 'picker-selection-edit', 'Editar');
+        edit.type = 'button';
+        edit.dataset.pickerEditSize = group.label;
+        edit.setAttribute('aria-label', `Editar colores y cantidades de talla ${group.label}`);
+        heading.append(createElement('strong', '', `Talla ${group.label}`), edit);
         block.append(heading);
-        group.lines.forEach(({ line }) => {
-          const row = createElement('p', 'picker-selected-line');
-          row.append(createElement('span', '', pickerView === 'size' ? line.color : `Talla ${line.size}`), createElement('span', '', `${line.qty} und.`));
-          block.append(row);
+        const colors = createElement('div', 'picker-selection-variants');
+        group.lines.sort((a, b) => selectedProduct!.colors.indexOf(a.line.color) - selectedProduct!.colors.indexOf(b.line.color)).forEach(({ line }) => {
+          const row = createElement('p', 'picker-selection-variant');
+          const swatch = createElement('span', 'picker-swatch');
+          swatch.style.setProperty('--swatch', tramaColorHex(line.color, selectedProduct?.color_hexes));
+          swatch.setAttribute('aria-hidden', 'true');
+          row.append(swatch, createElement('span', '', line.color), createElement('strong', '', `× ${line.qty}`));
+          colors.append(row);
         });
+        const total = createElement('p', 'picker-selection-total');
+        total.append(createElement('span', '', formatGarments(group.quantity)), createElement('strong', '', formatPrice(Math.round(unitPrice * 100) * group.quantity / 100)));
+        block.append(colors, total);
         return block;
       });
-      pickerSelected.replaceChildren(...(lines.length ? lines : [createElement('p', 'picker-selected-empty', 'Todavía no elegiste cantidades.')]));
+      pickerSelected.replaceChildren(...(lines.length ? lines : [createElement('p', 'picker-selected-empty', 'Aquí verás cada talla con sus colores, cantidades e importe.')]));
     }
     if (pickerAdd) {
       pickerAdd.disabled = !changed || (!editing && quantity === 0) || Boolean(pickerSizes?.querySelector('input:invalid'));
-      pickerAdd.firstChild!.textContent = 'Añadir al pedido ';
-      const icon = pickerAdd.querySelector('span');
-      if (icon) icon.textContent = '+';
+      pickerAdd.textContent = editing ? (changed ? 'Guardar cambios' : 'Ya está en tu pedido') : 'Añadir al pedido';
     }
     if (pickerClear) pickerClear.disabled = quantity === 0 && !pickerSizes?.querySelector('input:invalid');
-    document.querySelectorAll<HTMLButtonElement>('[data-picker-view]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.pickerView === pickerView)));
+    if (pickerReview) pickerReview.disabled = quantity === 0;
     document.querySelectorAll<HTMLButtonElement>('[data-picker-entry-view]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.pickerEntryView === pickerEntryView)));
   };
 
@@ -513,7 +551,8 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
     if (pickerColors) pickerColors.hidden = bySize;
     if (pickerSizeOptions) pickerSizeOptions.hidden = !bySize;
     pickerText('product-picker-axis-instruction', bySize ? 'Elige una talla' : 'Elige un color');
-    pickerText('product-picker-axis-label', bySize ? 'Talla activa: ' : 'Color activo: ');
+    pickerText('product-picker-axis-label', bySize ? 'Talla elegida: ' : 'Color elegido: ');
+    pickerText('product-picker-quantity-instruction', bySize ? '¿Cuántas prendas de cada color?' : '¿Cuántas prendas por talla?');
     pickerText('product-picker-selected-color', bySize ? selectedSize : selectedColor);
     pickerText('product-picker-row-heading', bySize ? 'Color' : 'Talla');
     updatePicker();
@@ -529,10 +568,19 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
     updatePicker();
   };
 
-  document.querySelectorAll<HTMLButtonElement>('[data-picker-view]').forEach((button) => button.addEventListener('click', () => {
-    pickerView = button.dataset.pickerView === 'size' ? 'size' : 'color';
-    updatePicker();
-  }, { signal }));
+  pickerSelected?.addEventListener('click', (event) => {
+    const button = event.target instanceof Element ? event.target.closest<HTMLButtonElement>('[data-picker-edit-size]') : null;
+    if (!button || !selectedProduct) return;
+    const invalid = pickerSizes?.querySelector<HTMLInputElement>('input:invalid');
+    if (invalid) { invalid.reportValidity(); invalid.focus(); return; }
+    selectedSize = button.dataset.pickerEditSize!;
+    selectedColor = draft.find((line) => line.size === selectedSize)?.color || selectedColor;
+    pickerEntryView = 'size';
+    renderPickerPhoto();
+    renderPickerSizes();
+    pickerSizeOptions?.querySelector<HTMLButtonElement>('[aria-pressed="true"]')?.focus({ preventScroll: true });
+    document.getElementById('picker-colors-heading')?.scrollIntoView({ block: 'start' });
+  }, { signal });
 
   document.querySelectorAll<HTMLButtonElement>('[data-picker-entry-view]').forEach((button) => button.addEventListener('click', () => {
     if (!selectedProduct) return;
@@ -584,8 +632,9 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
       }));
     }
     renderPickerSizes();
+    syncPickerViewport();
     picker.showModal();
-    picker.scrollTop = 0;
+    if (pickerBody) pickerBody.scrollTop = 0;
   }, { signal });
 
   pickerImage?.addEventListener('error', () => renderPickerPhoto(true), { signal });
@@ -649,6 +698,7 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
       const quantity = draft.reduce((sum, line) => sum + line.qty, 0);
       saveAndRender();
       picker?.close();
+      openOrder();
       announce(editing
         ? `Selección de ${selectedProduct.name} actualizada: ${formatGarments(quantity)} en tu pedido.`
         : `${formatGarments(quantity)} de ${selectedProduct.name} ${quantity === 1 ? 'añadida' : 'añadidas'}. Revisa las tallas y colores en Mi pedido.`);

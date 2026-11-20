@@ -77,6 +77,10 @@ export default async function Storefront({ currentPage, children }: Props) {
 
       <TramaProductPicker />
       <TramaPhotoViewer />
+      <div id="floating-order" className="floating-order" hidden>
+        <div><strong data-floating-order-count /><span data-floating-order-total /></div>
+        <button type="button" className="trama-button" data-open-order>Ver mi pedido</button>
+      </div>
       <dialog id="order-dialog" aria-labelledby="order-title" data-order-step="empty">
         <div className="order-header">
           <div className="order-heading"><h2 id="order-title" tabIndex={-1}>Mi pedido</h2><button type="button" id="close-order" aria-label="Cerrar mi pedido">×</button></div>
