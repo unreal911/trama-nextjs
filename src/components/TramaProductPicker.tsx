@@ -26,13 +26,13 @@ export default function TramaProductPicker() {
 
             <section className="picker-options" aria-label="Cantidades por talla y color">
               <h3 id="product-picker-quantity-instruction">¿Cuántas prendas por talla?</h3>
-              <p className="picker-help">Usa + y − o escribe la cantidad. Puedes combinar varios colores y tallas.</p>
+              <p className="picker-help">Usa + y − o escribe la cantidad. Tu pedido se actualiza automáticamente. Pon 0 para quitar una talla o color.</p>
               <div id="product-picker-size-head" className="picker-size-head" aria-hidden="true"><span id="product-picker-row-heading">Talla</span><span>Cantidad</span><span>Precio c/u</span></div>
               <div id="product-picker-sizes" className="picker-sizes"></div>
             </section>
 
             <section id="product-picker-selection" className="picker-selection" aria-labelledby="picker-selection-heading" tabIndex={-1}>
-              <div className="picker-selection-heading"><h3 id="picker-selection-heading">Resumen de esta prenda</h3><button type="button" id="product-picker-clear">Borrar todo</button></div>
+              <div className="picker-selection-heading"><h3 id="picker-selection-heading">Esta prenda en tu pedido</h3><button type="button" id="product-picker-clear">Quitar esta prenda</button></div>
               <p className="picker-help" id="product-picker-selection-count">Elige tus cantidades para ver el detalle aquí.</p>
               <div id="product-picker-selected" className="picker-selected"></div>
             </section>
@@ -46,7 +46,8 @@ export default function TramaProductPicker() {
           <div><strong id="product-picker-quantity">0 prendas</strong><span id="product-picker-unit-price">S/ 0.00 c/u</span></div>
           <div className="picker-subtotal"><span>Subtotal</span><strong id="product-picker-total">S/ 0.00</strong></div>
         </div>
-        <div className="picker-checkout"><button type="button" id="product-picker-review" className="picker-review" disabled>Ver selección</button><button type="button" id="product-picker-add" className="trama-button" disabled>Añadir al pedido</button></div>
+        <p id="product-picker-save-status" className="picker-save-status" role="status" aria-live="polite">Los cambios se guardan automáticamente.</p>
+        <div className="picker-checkout"><button type="button" id="product-picker-continue" className="picker-continue">Seguir eligiendo</button><button type="button" id="product-picker-view-order" className="trama-button" disabled>Ver mi pedido</button></div>
         <p id="product-picker-feedback" role="status" aria-live="polite"></p>
       </footer>
     </dialog>

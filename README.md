@@ -4,7 +4,7 @@ Tienda en Next.js con catálogo, pedido mayorista y panel de productos. Usa Supa
 
 ## Pedidos de compradores
 
-El selector de prendas mantiene cantidad, subtotal, **Ver selección** y **Añadir al pedido** en una barra inferior siempre visible, también en celular. El resumen agrupa por talla, en el orden del catálogo, y muestra sus colores, cantidades e importe; **Editar** vuelve a esa talla sin borrar las otras cantidades. Al añadir o guardar cambios se abre **Mi pedido** para revisarlo o seguir eligiendo. Un acceso flotante con cantidad y total permite volver al pedido desde el catálogo. Reabrir una prenda conserva la selección y **Guardar cambios** reemplaza sus cantidades sin duplicarlas.
+El selector de prendas actualiza el pedido y lo guarda en el navegador al usar **+**, **−** o escribir una cantidad válida. Poner **0** quita esa combinación de talla y color; **Quitar esta prenda** elimina solo las cantidades del modelo abierto. Los valores inválidos conservan la última cantidad válida. La barra inferior mantiene cantidad, subtotal, el aviso de guardado automático, **Seguir eligiendo** y **Ver mi pedido** siempre visibles, también en celular. El resumen agrupa por talla, en el orden del catálogo, y muestra sus colores, cantidades e importe; **Editar** vuelve a esa talla sin borrar las otras cantidades. Cerrar el selector conserva los cambios y reabrirlo recupera las cantidades sin duplicarlas. Un acceso flotante con cantidad y total permite volver al pedido desde el catálogo.
 
 Ejecuta [somos_orders.sql](supabase/somos_orders.sql) en el SQL Editor de tu proyecto Supabase después de las migraciones del catálogo y mayoristas. El archivo es repetible y conserva los pedidos existentes.
 

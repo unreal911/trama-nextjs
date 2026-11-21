@@ -38,7 +38,7 @@ body:has(#product-dialog[open]) { overflow: hidden; }
 .picker-heading h2 { margin-top: 14px; font: 600 clamp(25px, 3vw, 37px)/1.15 'Manrope', sans-serif; letter-spacing: -.055em; }
 .picker-options { margin-top: 26px; }
 .picker-options h3, .picker-selection h3 { font-size: 18px; font-weight: 650; line-height: 1.5; overflow-wrap: anywhere; }
-.picker-current-color { margin-top: 8px; color: var(--muted); font-size: 16px; font-weight: 500; line-height: 1.5; overflow-wrap: anywhere; }
+.picker-current-color { margin-top: 8px; color: var(--muted); font-size: 1.125rem; font-weight: 500; line-height: 1.5; overflow-wrap: anywhere; }
 .picker-current-color b { color: var(--ink); }
 .picker-colors { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
 .picker-color { position: relative; display: grid; place-items: center; flex: 0 0 50px; height: 50px; padding: 0; color: var(--ink); background: var(--paper); border: 1px solid var(--control-line); border-radius: 8px; }
@@ -74,6 +74,7 @@ body:has(#product-dialog[open]) { overflow: hidden; }
 .picker-quantity-control input::-webkit-outer-spin-button, .picker-quantity-control input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .picker-selection { margin-top: 24px; padding: 18px; background: var(--soft); border: 1px solid var(--line); border-radius: 8px; }
 .picker-selection-heading { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+.picker-selection > .picker-selection-heading { flex-wrap: wrap; }
 .picker-help { margin-top: 6px; color: var(--muted); font-size: 14px; line-height: 1.5; }
 .picker-selection:focus { outline: 2px solid var(--accent); outline-offset: 3px; }
 .picker-selection-card { padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
@@ -99,10 +100,10 @@ body:has(#product-dialog[open]) { overflow: hidden; }
 .picker-subtotal strong { font: 650 24px/1.2 'Manrope', sans-serif; letter-spacing: -.045em; white-space: nowrap; }
 .picker-quantity-note { margin-top: 16px; color: var(--muted); font-size: 14px; line-height: 1.5; }
 .picker-checkout { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 14px; margin-top: 10px; }
-.picker-review { min-height: 48px; padding: 8px 0; color: var(--accent); background: transparent; font-size: 15px; font-weight: 650; text-decoration: underline; text-underline-offset: 3px; }
-.picker-review:disabled { opacity: .45; cursor: default; }
-#product-picker-add { min-height: 50px; padding: 12px; justify-content: center; font-size: 16px; }
-#product-picker-add:disabled { opacity: .4; cursor: default; }
+.picker-save-status { margin-top: 6px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.picker-continue { min-height: 48px; padding: 8px 0; color: var(--accent); background: transparent; font-size: 15px; font-weight: 650; text-decoration: underline; text-underline-offset: 3px; }
+#product-picker-view-order { min-height: 50px; padding: 12px; justify-content: center; font-size: 16px; }
+#product-picker-view-order:disabled { opacity: .4; cursor: default; }
 #product-picker-feedback { margin-top: 8px; color: var(--accent); font-size: 15px; line-height: 1.6; }
 #product-picker-feedback:empty { display: none; }
 #order-copy:disabled { opacity: .45; cursor: default; }

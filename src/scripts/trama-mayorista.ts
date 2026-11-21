@@ -357,11 +357,13 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
 
   const saveAndRender = () => {
     copyAttempt += 1;
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(order)); } catch { /* The order remains usable when storage is unavailable. */ }
+    let persisted = true;
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(order)); } catch { persisted = false; }
     setOrderFeedback('');
     if (exportArea) exportArea.hidden = true;
     checkoutStep = 'review';
     renderOrder();
+    return persisted;
   };
 
   document.querySelectorAll<HTMLButtonElement>('[data-order-view]').forEach((button) => button.addEventListener('click', () => {
@@ -374,11 +376,9 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
   const pickerSizeOptions = document.querySelector<HTMLElement>('#product-picker-size-options');
   const pickerSizes = document.querySelector<HTMLElement>('#product-picker-sizes');
   const pickerSelected = document.querySelector<HTMLElement>('#product-picker-selected');
-  const pickerAdd = document.querySelector<HTMLButtonElement>('#product-picker-add');
+  const pickerViewOrder = document.querySelector<HTMLButtonElement>('#product-picker-view-order');
   const pickerClear = document.querySelector<HTMLButtonElement>('#product-picker-clear');
-  const pickerReview = document.querySelector<HTMLButtonElement>('#product-picker-review');
   const pickerBody = document.getElementById('product-picker-body');
-  const pickerSelection = document.getElementById('product-picker-selection');
   const pickerFeedback = document.querySelector<HTMLElement>('#product-picker-feedback');
   const pickerImage = document.querySelector<HTMLImageElement>('#product-picker-image');
   const pickerCaption = document.getElementById('product-picker-photo-caption');
@@ -406,18 +406,10 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
   window.visualViewport?.addEventListener('resize', resizePicker, { passive: true, signal });
   window.visualViewport?.addEventListener('scroll', resizePicker, { passive: true, signal });
   window.addEventListener('resize', resizePicker, { passive: true, signal });
-  pickerReview?.addEventListener('click', () => {
-    pickerSelection?.focus({ preventScroll: true });
-    pickerSelection?.scrollIntoView({ block: 'start' });
-  }, { signal });
-
   const updatePicker = () => {
     if (!selectedProduct) return;
     const quantity = draft.reduce((sum, line) => sum + line.qty, 0);
-    const savedSelection = order.filter((line) => line.id === selectedProduct!.id);
-    const editing = savedSelection.length > 0;
-    const changed = savedSelection.length !== draft.length || draft.some((line) => !savedSelection.some((saved) => saved.color === line.color && saved.size === line.size && saved.qty === line.qty));
-    const combinedQuantity = order.filter((line) => line.id !== selectedProduct!.id).reduce((sum, line) => sum + line.qty, quantity);
+    const combinedQuantity = totals().quantity;
     const unitPrice = selectedProduct.price;
     pickerText('product-picker-quantity', formatGarments(quantity));
     pickerText('product-picker-unit-price', `${formatPrice(unitPrice)} c/u`);
@@ -426,7 +418,7 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
       ? `${formatGarments(quantity)} en ${sizeCount} ${sizeCount === 1 ? 'talla' : 'tallas'}. Revisa los colores y cantidades.`
       : 'Elige tus cantidades para ver el detalle aquí.');
     pickerText('product-picker-total', formatPrice(Math.round(unitPrice * 100) * quantity / 100));
-    const combinedNote = `Con esta selección tendrás ${formatGarments(combinedQuantity)} en tu pedido.`;
+    const combinedNote = `Tienes ${formatGarments(combinedQuantity)} en tu pedido.`;
     const missing = minimum - combinedQuantity;
     pickerText('product-picker-quantity-note', combinedQuantity < minimum
       ? `${combinedNote} ${missing === 1 ? 'Falta' : 'Faltan'} ${formatGarments(missing)} para el mínimo. Puedes añadir otros modelos.`
@@ -487,12 +479,13 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
       });
       pickerSelected.replaceChildren(...(lines.length ? lines : [createElement('p', 'picker-selected-empty', 'Aquí verás cada talla con sus colores, cantidades e importe.')]));
     }
-    if (pickerAdd) {
-      pickerAdd.disabled = !changed || (!editing && quantity === 0) || Boolean(pickerSizes?.querySelector('input:invalid'));
-      pickerAdd.textContent = editing ? (changed ? 'Guardar cambios' : 'Ya está en tu pedido') : 'Añadir al pedido';
-    }
+    if (pickerViewOrder) pickerViewOrder.disabled = order.length === 0 || Boolean(pickerSizes?.querySelector('input:invalid'));
     if (pickerClear) pickerClear.disabled = quantity === 0 && !pickerSizes?.querySelector('input:invalid');
-    if (pickerReview) pickerReview.disabled = quantity === 0;
+    const invalid = pickerSizes?.querySelector<HTMLInputElement>('input:invalid');
+    if (invalid) {
+      if (pickerFeedback) pickerFeedback.textContent = invalid.validationMessage;
+      pickerText('product-picker-save-status', 'Revisa la cantidad. Tu pedido conserva las últimas cantidades válidas.');
+    }
     document.querySelectorAll<HTMLButtonElement>('[data-picker-entry-view]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.pickerEntryView === pickerEntryView)));
   };
 
@@ -558,13 +551,38 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
     updatePicker();
   };
 
+  const savePickerSelection = (selection: OrderLine[]) => {
+    if (!selectedProduct || submittingOrder) return false;
+    try {
+      order = replaceProductSelection(order, selectedProduct.id, selection, productById);
+      draft = order.filter((line) => line.id === selectedProduct!.id).map((line) => ({ ...line }));
+      const persisted = saveAndRender();
+      if (pickerFeedback) pickerFeedback.textContent = '';
+      pickerText('product-picker-save-status', persisted
+        ? 'Pedido actualizado. Los cambios se guardan automáticamente.'
+        : 'Pedido actualizado en esta página. No se pudo guardar para después de recargar.');
+      return true;
+    } catch (error) {
+      if (pickerFeedback) pickerFeedback.textContent = error instanceof Error ? error.message : 'No se pudo actualizar el pedido.';
+      pickerText('product-picker-save-status', 'Este cambio no se guardó. Se conserva la cantidad anterior.');
+      return false;
+    }
+  };
+
   const setDraftQuantity = (size: string, qty: number, color = selectedColor) => {
     if (!selectedProduct) return;
-    const existing = draft.find((line) => line.color === color && line.size === size);
-    if (qty === 0) draft = draft.filter((line) => line !== existing);
+    let selection = draft.map((line) => ({ ...line }));
+    const existing = selection.find((line) => line.color === color && line.size === size);
+    if (qty === 0) selection = selection.filter((line) => line !== existing);
     else if (existing) existing.qty = qty;
-    else draft.push({ id: selectedProduct.id, color, size, qty });
-    if (pickerFeedback) pickerFeedback.textContent = '';
+    else selection.push({ id: selectedProduct.id, color, size, qty });
+    const saved = savePickerSelection(selection);
+    if (!saved) {
+      const row = [...(pickerSizes?.querySelectorAll<HTMLElement>('[data-picker-size-row]') || [])]
+        .find((row) => row.dataset.pickerSizeRow === size && row.dataset.pickerRowColor === color);
+      const input = row?.querySelector<HTMLInputElement>('input');
+      if (input) input.value = String(draftQuantity(size, color));
+    }
     updatePicker();
   };
 
@@ -605,6 +623,7 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
     const coverPreview = document.getElementById('product-picker-cover');
     if (coverPreview) { coverPreview.dataset.previewProduct = selectedProduct.id; coverPreview.setAttribute('aria-label', `Ver foto del catálogo de ${selectedProduct.name}`); }
     if (pickerFeedback) pickerFeedback.textContent = '';
+    pickerText('product-picker-save-status', 'Los cambios se guardan automáticamente.');
     picker.classList.toggle('has-color-photos', selectedProduct.colors.some((color) => getColorPhoto(selectedProduct!, color)));
     renderPickerPhoto();
     if (pickerColors) {
@@ -668,14 +687,24 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
     const color = row?.dataset.pickerRowColor;
     if (!size || !color) return;
     input.setCustomValidity('');
-    const qty = input.value === '' ? 0 : input.valueAsNumber;
+    const qty = input.valueAsNumber;
     if (input.validity.badInput || !Number.isInteger(qty) || qty < 0 || qty > MAX_LINE_QUANTITY) {
       input.setCustomValidity(`Usa una cantidad entera entre 0 y ${MAX_LINE_QUANTITY}.`);
       if (pickerFeedback) pickerFeedback.textContent = input.validationMessage;
+      pickerText('product-picker-save-status', 'Revisa la cantidad. Tu pedido conserva las últimas cantidades válidas.');
       updatePicker();
       return;
     }
     setDraftQuantity(size, qty, color);
+  }, { signal });
+  pickerSizes?.addEventListener('change', (event) => {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement) || input.value !== '' || input.validity.badInput) return;
+    const row = input.closest<HTMLElement>('[data-picker-size-row]');
+    if (!row?.dataset.pickerSizeRow || !row.dataset.pickerRowColor) return;
+    input.value = '0';
+    input.setCustomValidity('');
+    setDraftQuantity(row.dataset.pickerSizeRow, 0, row.dataset.pickerRowColor);
   }, { signal });
   pickerSizes?.addEventListener('click', (event) => {
     const button = event.target instanceof Element ? event.target.closest<HTMLButtonElement>('[data-picker-step]') : null;
@@ -689,23 +718,15 @@ export function initializeTrama(signal: AbortSignal, { companyName, whatsappNumb
     input.setCustomValidity('');
     setDraftQuantity(size, qty, color);
   }, { signal });
-  pickerClear?.addEventListener('click', () => { draft = []; if (pickerFeedback) pickerFeedback.textContent = ''; renderPickerSizes(); }, { signal });
-  pickerAdd?.addEventListener('click', () => {
-    if (!selectedProduct || pickerAdd.disabled || pickerSizes?.querySelector('input:invalid')) return;
-    try {
-      const editing = order.some((line) => line.id === selectedProduct!.id);
-      order = replaceProductSelection(order, selectedProduct.id, draft, productById);
-      const quantity = draft.reduce((sum, line) => sum + line.qty, 0);
-      saveAndRender();
-      picker?.close();
-      openOrder();
-      announce(editing
-        ? `Selección de ${selectedProduct.name} actualizada: ${formatGarments(quantity)} en tu pedido.`
-        : `${formatGarments(quantity)} de ${selectedProduct.name} ${quantity === 1 ? 'añadida' : 'añadidas'}. Revisa las tallas y colores en Mi pedido.`);
-    } catch (error) {
-      if (pickerFeedback) pickerFeedback.textContent = error instanceof Error ? error.message : 'No se pudo añadir la selección.';
-    }
+  pickerClear?.addEventListener('click', () => {
+    if (savePickerSelection([])) renderPickerSizes();
   }, { signal });
+  pickerViewOrder?.addEventListener('click', () => {
+    if (pickerViewOrder.disabled || pickerSizes?.querySelector('input:invalid')) return;
+    picker?.close();
+    openOrder();
+  }, { signal });
+  document.getElementById('product-picker-continue')?.addEventListener('click', () => picker?.close(), { signal });
   document.querySelector<HTMLButtonElement>('#close-product')?.addEventListener('click', () => picker?.close(), { signal });
   picker?.addEventListener('close', () => pickerTrigger?.focus(), { signal });
   picker?.addEventListener('click', (event) => {
