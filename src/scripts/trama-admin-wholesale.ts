@@ -47,6 +47,7 @@ export function mountWholesaleSettings(root: HTMLElement, client: SupabaseClient
       for (const [key, value] of Object.entries(settings.content)) input(key).value = value;
       input('show_intro').checked = settings.show_intro;
       input('show_variants').checked = settings.show_variants;
+      form.closest('details')!.open = true;
       fields.disabled = false;
       setStatus('');
     } catch (error) {

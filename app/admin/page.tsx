@@ -10,6 +10,7 @@ import '../../src/styles/fonts.css';
 import '../../src/styles/demo-trama.css';
 import '../../src/styles/trama-admin.css';
 import '../../src/styles/trama-orders.css';
+import '../../src/styles/trama-dashboard.css';
 
 export const metadata: Metadata = {
   title: 'Administración',
@@ -68,12 +69,12 @@ export default async function AdminPage() {
     <AdminClient>
       <header className="trama-admin-header">
         <StoreBrand companyName={companyName} />
-        <a className="trama-admin-link" href="/coleccion">Ver colección <span aria-hidden="true">↗</span></a>
+        <a className="trama-admin-link" href="/coleccion">Ver tienda</a>
       </header>
       <main className="trama-admin-main">
         <section className="trama-admin-card trama-admin-auth" id="trama-admin-auth" aria-labelledby="trama-admin-auth-title">
           <h1 id="trama-admin-auth-title">Administración</h1>
-          <form id="trama-admin-login" method="post">
+          <p className="trama-admin-help">Inicia sesión para gestionar tus pedidos y productos.</p><form id="trama-admin-login" method="post">
             <fieldset disabled>
               <label>Correo electrónico <input name="email" type="email" autoComplete="username" required /></label>
               <label>Contraseña <input name="password" type="password" autoComplete="current-password" required /></label>
@@ -87,11 +88,10 @@ export default async function AdminPage() {
 
         <section id="trama-admin-panel" aria-labelledby="trama-admin-title" hidden>
           <div className="trama-admin-intro">
-            <div><h1 id="trama-admin-title" tabIndex={-1}>Tu tienda, al día</h1><p id="trama-admin-account" /></div>
+            <div><h1 id="trama-admin-title" tabIndex={-1}>Gestiona tu tienda</h1><p id="trama-admin-account" /></div>
             <button className="trama-admin-button trama-admin-secondary" type="button" data-trama-signout>Cerrar sesión</button>
           </div>
-          <AdminSections orders={<OrdersDashboard companyName={companyName} />}>
-          <section className="trama-admin-card trama-admin-company" aria-labelledby="trama-company-title">
+          <AdminSections orders={<OrdersDashboard companyName={companyName} />} company={<section className="trama-admin-card trama-admin-company" aria-labelledby="trama-company-title">
             <h2 id="trama-company-title">Datos de la empresa</h2>
             <form id="trama-company-form" method="post">
               <fieldset disabled>
@@ -111,15 +111,20 @@ export default async function AdminPage() {
             </form>
             <p className="trama-admin-status" id="trama-company-status" role="status" />
             <button className="trama-admin-button trama-admin-secondary" id="trama-company-retry" type="button" hidden>Volver a cargar los datos</button>
-          </section>
-          <PurchaseSectionsEditor />
-          <WholesaleEditor />
-          <div className="trama-admin-grid">
-            <section className="trama-admin-card trama-admin-editor" aria-labelledby="trama-editor-title">
-              <h2 id="trama-editor-title">Nuevo producto</h2>
+          </section>} purchase={<PurchaseSectionsEditor />} wholesale={<WholesaleEditor />} catalog={<><section className="trama-admin-card trama-admin-inventory" aria-labelledby="trama-inventory-title">
+              <div className="trama-admin-inventory-head">
+                <div><h3 id="trama-inventory-title">Tu catálogo <span className="admin-count" id="trama-inventory-count">0</span></h3><p className="trama-admin-help">Encuentra una prenda para editarla o añade una nueva.</p></div>
+                <div className="trama-admin-actions"><button className="trama-admin-button trama-admin-secondary" id="trama-inventory-refresh" type="button">Actualizar</button><button className="trama-admin-button" id="trama-product-new" type="button" disabled>Nuevo producto</button></div>
+              </div>
+              <div className="admin-catalog-filters"><label>Buscar producto<input id="trama-inventory-search" type="search" placeholder="Nombre o material de la prenda" /></label><label>Categoría<select id="trama-inventory-category" defaultValue="all"><option value="all">Todas las categorías</option>{categories.map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Visibilidad<select id="trama-inventory-publication" defaultValue="all"><option value="all">Todos los productos</option><option value="published">Publicados</option><option value="draft">Borradores</option></select></label></div><div className="admin-filter-reset"><button className="admin-text-button" id="trama-inventory-reset" type="button" hidden>Limpiar filtros</button></div><p className="trama-admin-status" id="trama-catalog-feedback" role="status" />
+<p className="trama-admin-status" id="trama-inventory-status" role="status" />
+              <ul className="trama-admin-list" id="trama-inventory-list" />
+              <template id="trama-inventory-row" dangerouslySetInnerHTML={{ __html: inventoryRow }} />
+            </section><dialog id="trama-product-dialog" aria-labelledby="trama-editor-title"><section className="trama-admin-card trama-admin-editor" aria-labelledby="trama-editor-title">
+              <div className="admin-editor-heading"><div><p className="admin-breadcrumb">CATÁLOGO DE PRODUCTOS</p><h2 id="trama-editor-title">Nuevo producto</h2></div><button className="admin-icon-button" type="button" id="trama-editor-close" aria-label="Cerrar editor de producto">×</button></div>
               <form id="trama-product-form" method="post">
                 <fieldset disabled>
-                  <label>Nombre <input name="name" required maxLength={120} /></label>
+                  <div className="admin-form-group"><h3>Información de la prenda</h3><p className="trama-admin-help">Nombre, precio y detalles que verá el comprador.</p></div><label>Nombre <input name="name" required maxLength={120} /></label>
                   <div className="trama-admin-fields">
                     <label>Categoría
                       <select name="category" required defaultValue="">
@@ -162,25 +167,10 @@ export default async function AdminPage() {
                   <label>Tallas <input name="sizes" required maxLength={500} placeholder="S, M, L" aria-describedby="trama-sizes-help" /></label>
                   <p id="trama-sizes-help" className="trama-admin-help">Separa las tallas con comas.</p>
                   <label className="trama-admin-check"><input name="published" type="checkbox" defaultChecked /> Publicar en la colección</label>
-                  <div className="trama-admin-actions">
-                    <button className="trama-admin-button" type="submit">Crear producto</button>
-                    <button className="trama-admin-button trama-admin-secondary" id="trama-editor-cancel" type="button" hidden>Cancelar edición</button>
-                  </div>
-                </fieldset>
-                <p className="trama-admin-status" id="trama-editor-status" role="status" />
-              </form>
-            </section>
-            <section className="trama-admin-card trama-admin-inventory" aria-labelledby="trama-inventory-title">
-              <div className="trama-admin-inventory-head">
-                <h2 id="trama-inventory-title">Productos guardados</h2>
-                <button className="trama-admin-button trama-admin-secondary" id="trama-inventory-refresh" type="button">Actualizar</button>
-              </div>
-              <p className="trama-admin-status" id="trama-inventory-status" role="status" />
-              <ul className="trama-admin-list" id="trama-inventory-list" />
-              <template id="trama-inventory-row" dangerouslySetInnerHTML={{ __html: inventoryRow }} />
-            </section>
-          </div>
-          </AdminSections>
+                  </fieldset><div className="admin-editor-footer"><div className="trama-admin-actions admin-editor-actions"><button className="trama-admin-button" type="submit">Crear producto</button>
+                    <button className="trama-admin-button trama-admin-secondary" id="trama-editor-cancel" type="button">Cancelar</button>
+                  </div><p className="trama-admin-status" id="trama-editor-status" role="status" /></div></form>
+            </section></dialog></>} />
         </section>
       </main>
     </AdminClient>

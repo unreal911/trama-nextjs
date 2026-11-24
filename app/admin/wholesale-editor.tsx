@@ -4,7 +4,7 @@ export function WholesaleEditor() {
   return (
     <section className="trama-admin-card trama-admin-purchase" aria-labelledby="trama-wholesale-title">
       <h2 id="trama-wholesale-title">Mayoristas</h2>
-      <details>
+      <details open>
         <summary>Editar página Mayoristas</summary>
         <form id="trama-wholesale-form" method="post">
           <fieldset disabled>
@@ -17,8 +17,8 @@ export function WholesaleEditor() {
             </fieldset>
             <p className="trama-admin-help">Escribe {'{pedidoMinimo}'} para incluir el mínimo actualizado en un texto, por ejemplo «desde 6 prendas».</p>
             {wholesaleTextGroups.map((group) => (
-              <fieldset className="trama-admin-purchase-item" key={group.title}>
-                <legend>{group.title}</legend>
+              <details className="admin-settings-group" key={group.title}><summary>{group.title}</summary><fieldset className="trama-admin-purchase-item">
+
                 <label className="trama-admin-check"><input name={group.visibility} type="checkbox" /> Mostrar sección en la página Mayoristas</label>
                 {group.fields.map((field) => (
                   <label key={field.name}>{field.label}{'optional' in field ? ' (opcional)' : ''}
@@ -27,7 +27,7 @@ export function WholesaleEditor() {
                       : <input name={field.name} maxLength={140} required={!('optional' in field)} />}
                   </label>
                 ))}
-              </fieldset>
+              </fieldset></details>
             ))}
             <div className="trama-admin-actions"><button className="trama-admin-button" type="submit">Guardar página Mayoristas</button></div>
           </fieldset>

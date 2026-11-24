@@ -77,6 +77,7 @@ export function mountPurchaseSections(root: HTMLElement, client: SupabaseClient,
         if (!isCurrent(version)) return;
         if (error) throw error;
         renderSettings(readPurchaseSection(section, data));
+        form.closest('details')!.open = section === 'steps';
         fields.disabled = false;
         setStatus('');
       } catch (error) {

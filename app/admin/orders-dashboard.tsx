@@ -26,6 +26,7 @@ export function OrdersDashboard({ companyName }: { companyName: string }) {
   const [updated, setUpdated] = useState<Date | null>(null);
   const [selected, setSelected] = useState<SubmittedOrder | null>(null);
   const [view, setView] = useState<OrderView>('size');
+  const [detailTab, setDetailTab] = useState<'review' | 'share'>('review');
   const [nextStatus, setNextStatus] = useState<OrderStatus>('pending');
   const [saving, setSaving] = useState(false);
   const [detailMessage, setDetailMessage] = useState('');
@@ -57,7 +58,8 @@ export function OrdersDashboard({ companyName }: { companyName: string }) {
     if (!quiet) setLoading(true);
     try {
       let request = client.from('wholesale_orders').select(columns, { count: 'exact' }).order('created_at', { ascending: false }).order('order_number', { ascending: false });
-      if (status !== 'all') request = request.eq('status', status);
+      if (status === 'active') request = request.in('status', ['confirmed', 'preparing']);
+      else if (status !== 'all') request = request.eq('status', status);
       const text = query.trim();
       if (/^(SM-)?\d+$/i.test(text) && (text.toUpperCase().startsWith('SM-') || text.length < 7)) request = request.eq('order_number', Number(text.replace(/^SM-/i, '')));
       else if (/^\+?[\d\s()-]{7,}$/.test(text)) request = request.ilike('customer_whatsapp', `%${text.replace(/\D/g, '')}%`);
@@ -79,6 +81,11 @@ export function OrdersDashboard({ companyName }: { companyName: string }) {
         : 'No se pudieron cargar los pedidos. Revisa la conexión y pulsa Actualizar.');
     } finally { if (version === requestVersion.current) setLoading(false); }
   }, [client, enabled, status, query, page]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => { setQuery(search.trim()); setPage(0); }, 350);
+    return () => window.clearTimeout(timer);
+  }, [search]);
 
   useEffect(() => {
     if (!enabled) { requestVersion.current++; setOrders([]); setStats(null); setSelected(null); setCount(0); setError(''); setUpdated(null); return; }
@@ -128,7 +135,17 @@ export function OrdersDashboard({ companyName }: { companyName: string }) {
   const changeQuantity = (item: SubmittedItem, qty: number) => setReview((current) => current.map((line) => orderVariantKey(line) === orderVariantKey(item) ? { ...line, qty } : line));
 
   function openOrder(order: SubmittedOrder) {
-    setView('size'); setSelected(order); setNextStatus(order.status); setReview(availabilityForOrder(order)); setDetailMessage('');
+    setView('size'); setDetailTab('review'); setSelected(order); setNextStatus(order.status); setReview(availabilityForOrder(order)); setDetailMessage('');
+  }
+
+  function closeDetail() {
+    if (saving || sharing || exporting) return;
+    if (reviewDirty && !window.confirm('Tienes cambios sin guardar en este pedido. ¿Quieres descartarlos y cerrar?')) return;
+    dialog.current?.close();
+  }
+
+  function filterStatus(value: string) {
+    setStatus(value); setPage(0);
   }
 
   async function saveReview() {
@@ -210,37 +227,43 @@ export function OrdersDashboard({ companyName }: { companyName: string }) {
   }, [selected]);
 
   return <section className="seller-orders" aria-labelledby="seller-orders-title">
-    <div className="seller-orders-title"><div><p className="seller-eyebrow">GESTIÓN DE PEDIDOS</p><h2 id="seller-orders-title">Lo que tus clientes están pidiendo</h2><p>Revisa las prendas, contacta al comprador y sigue cada pedido.</p></div>
-      <button className="trama-admin-button trama-admin-secondary" type="button" disabled={loading || !enabled} onClick={() => void load()}>↻ Actualizar</button></div>
+    <div className="seller-orders-title"><h3 id="seller-orders-title">Resumen de pedidos</h3><button className="trama-admin-button trama-admin-secondary" type="button" disabled={loading || !enabled} onClick={() => void load()}>{loading ? 'Actualizando…' : 'Actualizar pedidos'}</button></div>
     <div className="seller-stats">
-      <div><span>Pedidos recibidos</span><strong>{stats ? stats.total : '—'}</strong></div>
-      <div className="seller-stat-pending"><span>Por atender</span><strong>{stats ? stats.pending : '—'}</strong></div>
-      <div><span>Confirmados / en preparación</span><strong>{stats ? stats.active : '—'}</strong></div>
+      <button type="button" aria-pressed={status === 'all'} onClick={() => filterStatus('all')}><span>Pedidos recibidos</span><strong>{stats ? stats.total : '—'}</strong><small>Ver todos</small></button>
+      <button type="button" className="seller-stat-pending" aria-pressed={status === 'pending'} onClick={() => filterStatus('pending')}><span>Por atender</span><strong>{stats ? stats.pending : '—'}</strong><small>Revisar nuevos</small></button>
+      <button type="button" aria-pressed={status === 'active'} onClick={() => filterStatus('active')}><span>En curso</span><strong>{stats ? stats.active : '—'}</strong><small>Confirmados y en preparación</small></button>
       <div><span>Valor solicitado · sin cancelados</span><strong>{stats ? formatPrice(Number(stats.amount)) : '—'}</strong></div>
     </div>
     <div className="trama-admin-card seller-orders-content">
       <div className="seller-filters">
         <form onSubmit={(event) => { event.preventDefault(); setPage(0); setQuery(search); }}><label htmlFor="seller-search">Buscar pedido</label><div><input id="seller-search" type="search" maxLength={120} placeholder="Nombre, WhatsApp o SM-000001" value={search} onChange={(event) => setSearch(event.target.value)} /><button className="trama-admin-button trama-admin-secondary" type="submit">Buscar</button></div></form>
-        <label>Estado<select aria-label="Filtrar por estado" value={status} onChange={(event) => { setStatus(event.target.value); setPage(0); }}><option value="all">Todos los estados</option>{Object.entries(ORDER_STATUSES).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+        <label>Estado<select aria-label="Filtrar por estado" value={status} onChange={(event) => filterStatus(event.target.value)}><option value="all">Todos los estados</option><option value="active">En curso</option>{Object.entries(ORDER_STATUSES).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
       </div>
+      {(search || status !== 'all') && <div className="admin-filter-reset"><span>{status === 'all' ? 'Todos los estados' : status === 'active' ? 'En curso' : ORDER_STATUSES[status as OrderStatus]}{query && ` · «${query}»`}</span><button type="button" className="admin-text-button" onClick={() => { setSearch(''); setQuery(''); setStatus('all'); setPage(0); }}>Limpiar filtros</button></div>}
       <div className="seller-list-caption"><span>{loading ? 'Cargando pedidos…' : `${count} ${count === 1 ? 'pedido' : 'pedidos'}`}</span><span>{updated ? `Actualizado ${new Intl.DateTimeFormat('es-PE', { timeZone: 'America/Lima', hour: '2-digit', minute: '2-digit' }).format(updated)}` : 'Actualización automática cada 30 s'}</span></div>
       {error && <p className="seller-error" role="alert">{error}</p>}
-      {!loading && !error && orders.length === 0 && <div className="seller-empty"><span aria-hidden="true">↙</span><h3>{query || status !== 'all' ? 'No hay pedidos con estos filtros' : 'Aquí llegarán tus primeros pedidos'}</h3><p>{query || status !== 'all' ? 'Prueba otro nombre, código o estado.' : 'Cuando un comprador confirme «Enviar pedido», aparecerá su selección con nombre y WhatsApp.'}</p></div>}
+      {!loading && !error && orders.length === 0 && <div className="seller-empty"><h3>{query || status !== 'all' ? 'No hay pedidos con estos filtros' : 'Aquí llegarán tus primeros pedidos'}</h3><p>{query || status !== 'all' ? 'Prueba otro nombre, código o estado.' : 'Cuando un comprador envíe su pedido, aparecerá aquí con sus prendas y datos de contacto.'}</p></div>}
+      {orders.length > 0 && <div className="seller-table-heading" aria-hidden="true"><span>Pedido</span><span>Cliente</span><span>Prendas</span><span>Importe</span><span>Estado</span><span></span></div>}
       <div className="seller-order-list" aria-busy={loading}>
         {orders.map((order) => <article className="seller-order-card" key={order.id}>
-          <div className="seller-order-top"><strong>{orderCode(order.order_number)}</strong><span className={`seller-status status-${order.status}`}>{ORDER_STATUSES[order.status]}</span><time dateTime={order.created_at}>{dateFormat.format(new Date(order.created_at))}</time></div>
-          <div className="seller-order-body"><div><h3>{order.customer_name}</h3><p>+{order.customer_whatsapp}</p><span>{formatGarments(order.quantity)} · {new Set(order.items.map((item) => item.id)).size} {new Set(order.items.map((item) => item.id)).size === 1 ? 'modelo' : 'modelos'}</span></div><div className="seller-order-amount"><strong>{formatPrice(order.total)}</strong><button type="button" className="trama-admin-button trama-admin-secondary" onClick={() => openOrder(order)}>Ver pedido →</button></div></div>
+          <div className="seller-order-code"><strong>{orderCode(order.order_number)}</strong><time dateTime={order.created_at}>{dateFormat.format(new Date(order.created_at))}</time></div>
+          <div className="seller-order-customer"><h3>{order.customer_name}</h3><p>+{order.customer_whatsapp}</p></div>
+          <span className="seller-order-units">{formatGarments(order.quantity)}</span><strong className="seller-order-value">{formatPrice(order.total)}</strong><span className={`seller-status status-${order.status}`}>{ORDER_STATUSES[order.status]}</span>
+          <button type="button" className="trama-admin-button trama-admin-secondary" aria-label={`Ver pedido ${orderCode(order.order_number)} de ${order.customer_name}`} onClick={() => openOrder(order)}>Ver pedido</button>
         </article>)}
       </div>
-      {count > pageSize && <div className="seller-pagination"><button type="button" className="trama-admin-button trama-admin-secondary" disabled={page === 0 || loading} onClick={() => setPage(page - 1)}>← Anterior</button><span>Página {page + 1} de {Math.ceil(count / pageSize)}</span><button type="button" className="trama-admin-button trama-admin-secondary" disabled={(page + 1) * pageSize >= count || loading} onClick={() => setPage(page + 1)}>Siguiente →</button></div>}
+      {count > pageSize && <div className="seller-pagination"><button type="button" className="trama-admin-button trama-admin-secondary" disabled={page === 0 || loading} onClick={() => setPage(page - 1)}>Anterior</button><span>Página {page + 1} de {Math.ceil(count / pageSize)}</span><button type="button" className="trama-admin-button trama-admin-secondary" disabled={(page + 1) * pageSize >= count || loading} onClick={() => setPage(page + 1)}>Siguiente</button></div>}
     </div>
-    <dialog ref={dialog} id="seller-order-dialog" aria-labelledby="seller-detail-title" onClose={() => setSelected(null)}>
+    <dialog ref={dialog} id="seller-order-dialog" aria-labelledby="seller-detail-title" onCancel={(event) => { event.preventDefault(); closeDetail(); }} onClose={() => setSelected(null)}>
       {selected && <>
-        <div className="seller-detail-header"><div><p className="seller-eyebrow">DETALLE DEL PEDIDO</p><h2 id="seller-detail-title">{orderCode(selected.order_number)}</h2></div><button type="button" className="seller-detail-close" aria-label="Cerrar detalle del pedido" onClick={() => dialog.current?.close()}>×</button></div>
+        <div className="seller-detail-header"><div><p className="seller-eyebrow">DETALLE DEL PEDIDO</p><h2 id="seller-detail-title">{orderCode(selected.order_number)}</h2></div><button type="button" className="seller-detail-close" aria-label="Cerrar detalle del pedido" disabled={saving || sharing || exporting} onClick={closeDetail}>×</button></div>
+        <div className="seller-detail-content">
         <div className="seller-detail-buyer"><div><h3>{selected.customer_name}</h3><p>+{selected.customer_whatsapp}</p><time dateTime={selected.created_at}>{dateFormat.format(new Date(selected.created_at))}</time></div><a className="trama-admin-button" target="_blank" rel="noopener noreferrer" href={`https://wa.me/${selected.customer_whatsapp}?text=${encodeURIComponent(`Hola ${selected.customer_name}, te contactamos por tu pedido ${orderCode(selected.order_number)}.`)}`}>Contactar por WhatsApp ↗</a></div>
         {selected.notes && <p className="seller-buyer-note"><strong>Nota del comprador</strong>{selected.notes}</p>}
         <div className="seller-status-editor"><label>Estado del pedido<select aria-label="Estado del pedido" value={nextStatus} disabled={saving} onChange={(event) => setNextStatus(event.target.value as OrderStatus)}>{Object.entries(ORDER_STATUSES).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label></div>
-        <p className="seller-review-help">Indica cuántas prendas puedes entregar en este pedido. Se conserva la cantidad solicitada por el comprador.</p>
+        <div className="seller-detail-tabs" role="group" aria-label="Secciones del pedido"><button type="button" aria-pressed={detailTab === 'review'} onClick={() => setDetailTab('review')}>Prendas y disponibilidad</button><button type="button" aria-pressed={detailTab === 'share'} onClick={() => setDetailTab('share')}>Proforma y enlaces {shares.length > 0 && <span className="admin-count">{shares.length}</span>}</button></div>
+        <div hidden={detailTab !== 'review'}>
+        <p className="seller-review-help">Ajusta lo que puedes entregar. La cantidad solicitada por el comprador se conserva.</p>
         <div className="order-view-switch" role="group" aria-label="Agrupar detalle del pedido"><button type="button" aria-pressed={view === 'color'} onClick={() => setView('color')}>Por color</button><button type="button" aria-pressed={view === 'size'} onClick={() => setView('size')}>Por talla</button></div>
         {productGroups.map((lines) => <section className="seller-product" key={lines[0].id}><h3>{lines[0].name}</h3>
           {groupSelectionLines(lines, view).map((group) => <div className="seller-variant-group" key={group.label}><h4><span className="seller-group-label">{view === 'color' && colorDot(lines[group.lines[0].index])}{view === 'size' ? `Talla ${group.label}` : group.label}</span><span>{formatGarments(group.quantity)} {group.quantity === 1 ? 'solicitada' : 'solicitadas'}</span></h4>
@@ -257,10 +280,9 @@ export function OrdersDashboard({ companyName }: { companyName: string }) {
         </section>)}
         {reviewError && <p className="seller-error" role="alert">{reviewError}</p>}
         <div className="seller-original-total"><span>Solicitado: {formatGarments(selected.quantity)}</span><strong>{formatPrice(selected.total)}</strong></div>
-        <div className="seller-detail-total"><span>{reviewTotal ? formatGarments(reviewTotal.quantity) : 'Revisa las cantidades'}<small>Disponible para este pedido</small></span><strong>{reviewTotal ? formatPrice(reviewTotal.total) : '—'}</strong></div>
-        <div className="seller-review-actions"><button type="button" className="trama-admin-button" disabled={saving || Boolean(reviewError) || (!reviewDirty && Boolean(selected.availability_reviewed_at))} onClick={() => void saveReview()}>{saving ? 'Guardando…' : 'Guardar revisión'}</button><button type="button" className="trama-admin-button trama-admin-secondary" disabled={!canExport || exporting} onClick={() => void exportPdf()}>{exporting ? 'Generando PDF…' : 'Exportar PDF'}</button></div>
-        <p className="trama-admin-status" role="status">{detailMessage}</p>
-        {(!selected.availability_reviewed_at || reviewDirty) && <p className="trama-admin-help">Guarda la revisión antes de exportar o crear un enlace.</p>}
+        </div>
+        <div hidden={detailTab !== 'share'}>
+        {!canExport && <p className="admin-inline-notice">Guarda la disponibilidad del pedido antes de generar una proforma.</p>}
         <section className="seller-share-section" aria-labelledby="seller-share-title"><h3 id="seller-share-title">Proforma para el cliente</h3><p>Comparte una versión fija de esta revisión. El enlace dura 7 días y se abre sin iniciar sesión.</p>
           <label>Mensaje para el cliente<textarea value={shareMessage} maxLength={1000} rows={3} disabled={sharing} onChange={(event) => setShareMessage(event.target.value)} /></label>
           <button type="button" className="trama-admin-button" disabled={!canExport || sharing} onClick={() => void createShare()}>{sharing ? 'Creando enlace…' : 'Crear proforma temporal'}</button>
@@ -268,6 +290,13 @@ export function OrdersDashboard({ companyName }: { companyName: string }) {
             {active && <><input aria-label={`Enlace de proforma v${share.version}`} value={`${siteOrigin}/proforma/${share.token}`} readOnly onFocus={(event) => event.target.select()} /><div className="seller-review-actions"><button type="button" className="trama-admin-button trama-admin-secondary" onClick={() => void copyShare(share)}>Copiar enlace</button><a className="trama-admin-button trama-admin-secondary" href={`/proforma/${share.token}`} target="_blank" rel="noopener noreferrer">Vista previa ↗</a><button type="button" className="seller-revoke-link" disabled={sharing} onClick={() => void revokeShare(share)}>Desactivar</button></div></>}
           </div>; })}
         </section>
+        </div>
+        </div>
+        <footer className="seller-detail-footer">
+          <div className="seller-detail-total"><span>{reviewTotal ? formatGarments(reviewTotal.quantity) : 'Revisa las cantidades'}<small>Disponible para este pedido</small></span><strong>{reviewTotal ? formatPrice(reviewTotal.total) : '—'}</strong></div>
+          <div className="seller-review-actions"><button type="button" className="trama-admin-button" disabled={saving || Boolean(reviewError) || (!reviewDirty && Boolean(selected.availability_reviewed_at))} onClick={() => void saveReview()}>{saving ? 'Guardando…' : reviewDirty ? 'Guardar cambios' : selected.availability_reviewed_at ? 'Revisión guardada' : 'Confirmar disponibilidad'}</button><button type="button" className="trama-admin-button trama-admin-secondary" disabled={!canExport || exporting} onClick={() => void exportPdf()}>{exporting ? 'Generando PDF…' : 'Exportar PDF'}</button></div>
+          <p className="trama-admin-status" role="status">{detailMessage || (reviewError ? reviewError : reviewDirty ? 'Tienes cambios sin guardar.' : selected.availability_reviewed_at ? 'Puedes exportar el PDF o compartir una proforma.' : 'Revisa las cantidades y confirma la disponibilidad.')}</p>
+        </footer>
       </>}
     </dialog>
   </section>;

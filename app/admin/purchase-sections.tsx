@@ -10,7 +10,7 @@ export function PurchaseSectionsEditor() {
     <section className="trama-admin-card trama-admin-purchase" aria-labelledby="trama-purchase-title">
       <h2 id="trama-purchase-title">Contenido de «Cómo comprar»</h2>
       {sections.map(({ id, title, item, field, body }) => (
-        <details key={id}>
+        <details key={id} open={id === 'steps'}>
           <summary>{title}</summary>
           <form data-purchase-section={id} method="post" aria-label={title}>
             <fieldset disabled>

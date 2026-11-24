@@ -72,11 +72,23 @@ export function mountTramaAdmin(root: HTMLElement, onCompanySaved: () => void) {
   const inventoryStatus = root.querySelector<HTMLParagraphElement>('#trama-inventory-status')!;
   const inventory = root.querySelector<HTMLUListElement>('#trama-inventory-list')!;
   const rowTemplate = root.querySelector<HTMLTemplateElement>('#trama-inventory-row')!;
+  const productDialog = root.querySelector<HTMLDialogElement>('#trama-product-dialog')!;
+  const newProduct = root.querySelector<HTMLButtonElement>('#trama-product-new')!;
+  const productSearch = root.querySelector<HTMLInputElement>('#trama-inventory-search')!;
+  const productCategory = root.querySelector<HTMLSelectElement>('#trama-inventory-category')!;
+  const productPublication = root.querySelector<HTMLSelectElement>('#trama-inventory-publication')!;
+  const resetFilters = root.querySelector<HTMLButtonElement>('#trama-inventory-reset')!;
+  const catalogFeedback = root.querySelector<HTMLElement>('#trama-catalog-feedback')!;
 
   const migrationStatus = root.querySelector<HTMLParagraphElement>('#trama-color-migration')!;
 
   const lifecycle = new AbortController();
   const { signal } = lifecycle;
+  root.addEventListener('invalid', (event) => {
+    if (!(event.target instanceof HTMLElement)) return;
+    let details = event.target.closest('details');
+    while (details) { details.open = true; details = details.parentElement?.closest('details') || null; }
+  }, { capture: true, signal });
 
   function input(name: string) {
     return editor.elements.namedItem(name) as HTMLInputElement;
@@ -96,6 +108,9 @@ export function mountTramaAdmin(root: HTMLElement, onCompanySaved: () => void) {
   let uploadPath: string | null = null;
   let catalogReady = false;
   let variantPhotosSupported = false;
+  let catalog: CatalogProduct[] = [];
+  let editorDirty = false;
+  let editorTrigger: HTMLElement | null = null;
 
   const colors = mountTramaAdminVariants(root, signal, (busy) => {
     submit.disabled = busy;
@@ -128,8 +143,25 @@ export function mountTramaAdmin(root: HTMLElement, onCompanySaved: () => void) {
     colors.reset();
     editorTitle.textContent = 'Nuevo producto';
     submit.textContent = 'Crear producto';
-    cancel.hidden = true;
+    submit.disabled = false;
+    cancel.disabled = false;
+    cancel.hidden = false;
+    editorDirty = false;
     setStatus(editorStatus, '');
+  }
+
+  function closeEditor() {
+    if (editorFields.disabled || submit.disabled) return;
+    if (editorDirty && !window.confirm('Tienes cambios sin guardar. ¿Quieres descartarlos y cerrar?')) return;
+    resetEditor();
+    productDialog.close();
+  }
+
+  function showEditor() {
+    editorTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : newProduct;
+    productDialog.showModal();
+    productDialog.scrollTop = 0;
+    input('name').focus();
   }
 
   function editProduct(product: CatalogProduct) {
@@ -148,12 +180,19 @@ export function mountTramaAdmin(root: HTMLElement, onCompanySaved: () => void) {
     colors.reset(product.colors, product.color_hexes, product.color_images);
     input('sizes').value = product.sizes.join(', ');
     input('published').checked = product.published;
-    input('name').focus();
+    showEditor();
   }
 
   function renderProducts(products: CatalogProduct[]) {
+    const normalize = (text: string) => text.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase('es');
+    const words = normalize(productSearch.value).trim().split(/\s+/);
+    const filtered = products.filter((product) => words.every((word) => normalize(`${product.name} ${product.material} ${product.label}`).includes(word))
+      && (productCategory.value === 'all' || product.category === productCategory.value)
+      && (productPublication.value === 'all' || product.published === (productPublication.value === 'published')));
+    resetFilters.hidden = !productSearch.value && productCategory.value === 'all' && productPublication.value === 'all';
+    root.querySelector('#trama-inventory-count')!.textContent = String(products.length);
     const rows = document.createDocumentFragment();
-    for (const product of products) {
+    for (const product of filtered) {
       const row = rowTemplate.content.cloneNode(true) as DocumentFragment;
       const image = row.querySelector('img')!;
       if (validImage(product.image)) image.src = product.image;
@@ -173,8 +212,8 @@ export function mountTramaAdmin(root: HTMLElement, onCompanySaved: () => void) {
     }
     inventory.replaceChildren(rows);
     setStatus(inventoryStatus, products.length
-      ? `${products.length} ${products.length === 1 ? 'producto' : 'productos'}`
-      : 'Aún no hay productos guardados.');
+      ? filtered.length ? `${filtered.length} de ${products.length} productos` : 'No hay productos con estos filtros. Prueba otra búsqueda o limpia los filtros.'
+      : 'Tu catálogo está vacío. Pulsa Nuevo producto para añadir tu primera prenda.');
   }
 
   async function loadProducts() {
@@ -206,6 +245,7 @@ export function mountTramaAdmin(root: HTMLElement, onCompanySaved: () => void) {
       }
       if (!catalogReady) editorFields.disabled = false;
       catalogReady = true;
+      newProduct.disabled = false;
       variantPhotosSupported = withPhotos;
       colors.setPhotosEnabled(withPhotos);
       setStatus(
@@ -213,7 +253,8 @@ export function mountTramaAdmin(root: HTMLElement, onCompanySaved: () => void) {
         withPhotos ? '' : 'Para cargar fotos de variantes, ejecuta trama_product_color_images.sql en Supabase y pulsa Actualizar.',
         !withPhotos,
       );
-      renderProducts(products);
+      catalog = products;
+      renderProducts(catalog);
     } catch {
       if (version === inventoryVersion) {
         setStatus(inventoryStatus, 'No se pudo cargar el catálogo. Intenta actualizar.', true);
@@ -238,6 +279,15 @@ export function mountTramaAdmin(root: HTMLElement, onCompanySaved: () => void) {
       colors.setPhotosEnabled(false);
       setStatus(migrationStatus, '');
       resetEditor();
+      productDialog.close();
+      newProduct.disabled = true;
+      catalog = [];
+      productSearch.value = '';
+      productCategory.value = 'all';
+      productPublication.value = 'all';
+      resetFilters.hidden = true;
+      root.querySelector('#trama-inventory-count')!.textContent = '0';
+      setStatus(catalogFeedback, '');
       company.reset();
       purchaseSections.reset();
       wholesale.reset();
@@ -311,9 +361,22 @@ export function mountTramaAdmin(root: HTMLElement, onCompanySaved: () => void) {
     }, { signal });
   }
 
-  cancel.addEventListener('click', () => {
-    resetEditor();
-    input('name').focus();
+  cancel.addEventListener('click', closeEditor, { signal });
+  root.querySelector('#trama-editor-close')!.addEventListener('click', closeEditor, { signal });
+  productDialog.addEventListener('cancel', (event) => { event.preventDefault(); closeEditor(); }, { signal });
+  productDialog.addEventListener('close', () => { if (panel.hidden === false) editorTrigger?.focus(); }, { signal });
+  editor.addEventListener('input', () => { editorDirty = true; }, { signal });
+  editor.addEventListener('change', () => { editorDirty = true; }, { signal });
+  editor.addEventListener('click', (event) => {
+    if (event.target instanceof Element && event.target.closest('[data-color-remove], [data-color-clear], #trama-color-add, #trama-photo-clear')) editorDirty = true;
+  }, { signal });
+  newProduct.addEventListener('click', () => { if (!editorFields.disabled) { resetEditor(); showEditor(); } }, { signal });
+  productSearch.addEventListener('input', () => { if (catalogReady) renderProducts(catalog); }, { signal });
+  [productCategory, productPublication].forEach((select) => select.addEventListener('change', () => { if (catalogReady) renderProducts(catalog); }, { signal }));
+  resetFilters.addEventListener('click', () => {
+    productSearch.value = ''; productCategory.value = 'all'; productPublication.value = 'all';
+    if (catalogReady) renderProducts(catalog);
+    productSearch.focus();
   }, { signal });
   refresh.addEventListener('click', () => void loadProducts(), { signal });
   photoFile.addEventListener('change', () => {
@@ -366,6 +429,8 @@ export function mountTramaAdmin(root: HTMLElement, onCompanySaved: () => void) {
     const isEditing = Boolean(editingId);
     let uploadingPhoto = '';
     editorFields.disabled = true;
+    submit.disabled = true;
+    cancel.disabled = true;
     try {
       if (photo) {
         uploadingPhoto = 'la foto principal';
@@ -411,7 +476,8 @@ export function mountTramaAdmin(root: HTMLElement, onCompanySaved: () => void) {
       if (version !== sessionVersion) return;
       if (error) throw error;
       resetEditor();
-      setStatus(editorStatus, isEditing ? 'Cambios guardados.' : 'Producto creado.');
+      productDialog.close();
+      setStatus(catalogFeedback, isEditing ? 'Cambios guardados. Tu catálogo está actualizado.' : 'Producto creado. Ya aparece en tu catálogo.');
       void loadProducts();
     } catch (error) {
       if (version !== sessionVersion) return;
@@ -425,7 +491,11 @@ export function mountTramaAdmin(root: HTMLElement, onCompanySaved: () => void) {
         : 'No se pudo guardar el producto. Revisa los datos e intenta nuevamente.';
       setStatus(editorStatus, message, true);
     } finally {
-      if (version === sessionVersion) editorFields.disabled = false;
+      if (version === sessionVersion) {
+        editorFields.disabled = false;
+        submit.disabled = false;
+        cancel.disabled = false;
+      }
     }
   }, { signal });
 
